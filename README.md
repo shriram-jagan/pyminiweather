@@ -1,8 +1,8 @@
 # PyMiniWeather
 
-PyMiniWeather solves the compressible form of inviscid two-dimensional unsteady Euler equations using a finite volume discretization scheme. The discretized equations are second order accurate in space and third order accurate in time. See this [article](https://rmets.onlinelibrary.wiley.com/action/showCitFormats?doi=10.1002%2Fqj.3989) for more information on discretization. The current implementation is based on Matt Norman's [MiniWeather](https://github.com/mrnorman/miniWeather) that has serial and parallel implementations written in multiple compiled languages (C, C++, CUDA, OpenMP). However, this implementation focusses on an array-based implementation of the same algorithm. This work is a pedagogical exercise meant to teach users on how to approach problems in scientific computing using array-based paradigms instead of widely used elementwise codes using C, C++ or CUDA. And thue, this repository serves as a tutorial for users writing PDE solvers using NumPy. Array-based programming can be different from element-wise programming, and as will be demonstrated here, some of the computations like interpolation or numerical integration will be different from its elementwise counterpart.
+PyMiniWeather solves the compressible form of inviscid two-dimensional unsteady Euler equations using a finite volume discretization scheme. The discretized equations are second order accurate in space and third order accurate in time. See this [article](https://rmets.onlinelibrary.wiley.com/doi/10.1002/qj.3989) for more information on discretization. The current implementation is based on Matt Norman's [MiniWeather](https://github.com/mrnorman/miniWeather) that has serial and parallel implementations written in multiple compiled languages (C, C++, CUDA, OpenMP). However, this implementation focusses on an array-based implementation of the same algorithm. This work is a pedagogical exercise meant to teach users how to approach problems in scientific computing using array-based paradigms instead of widely used elementwise codes using C, C++ or CUDA. Thus, this repository serves as a tutorial for users writing PDE solvers using NumPy. Array-based programming can be different from element-wise programming, and as will be demonstrated here, some of the computations like interpolation and numerical integration will be different from its elementwise counterpart.
 
-We focus on the serial implementation of the MiniWeather app using two backends that support array-based programming - NumPy/SciPy and [cuNumeric](https://github.com/nv-legate/cunumeric). While NumPy only allows single thread execution of the program, cuNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity wanting to run at large problem sizes. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing. 
+We focus on the serial implementation of the [MiniWeather](https://github.com/mrnorman/miniWeather) app using two backends that support array-based programming - NumPy/SciPy and [cuNumeric](https://github.com/nv-legate/cunumeric). While NumPy only allows single threaded execution of the program, cuNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing. 
 
 ## Description
 
@@ -10,7 +10,7 @@ PyMiniWeather currently supports periodic boundary conditions in x-direction and
 
 The solution variables are stored at the cell centers and the fluxes and tendencies are stored at the cell edges. As is often the case with finite volume discretization, approximating the fluxes at the edges based on the quantities at cell centers involves reconstruction of the solution. In this implementation, a fourth-order accurate linear interpolation is employed for reconstruction of the solution variables and a first order accurate interpolation for the hyperviscosity term. 
 
-This linear interpolation with a fixed stencil is usually implemented using nested for loops like below:
+This linear interpolation with a fixed stencil is usually implemented using nested for loops like below (see [original code](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_serial.cpp#L280)):
 
 ```
 for (int k=0; k<nz; k++) {
@@ -38,8 +38,6 @@ Converting this code snippet to use NumPy or any other array-based library would
 However, it is important to note that the moving window operation that is performed here for all points that are relevant for the computation of flux is conceptually equivalent to a convolution operation in NumPy. 
 
 Convolution operations usually support three different modes of operation (full, valid and same) depending on the extent to which the interpolating kernel is allowed to convolve with the base array, which affects the size of the output. Since cuNumeric supports the "same" mode for convolution, we choose the "same" mode in this implementation. Since we convolve the conserved variables with an interpolating stencil to determine the flux at the cell edges, we can compute the shape of the flux array and slice the output array accordingly. See the code snippet below on how it is implemented:
-
- See code snippet below for an example, where the entire computation is represented by two convolution operations.
 ```
 for ivar in range(fields.nvariables):
   fields.vals_x[ivar, ...] = convolve(
@@ -69,7 +67,7 @@ PyMiniWeather supports evolution of the following flow configurations
 2. Falling thermal bubble (simulates cold bubble falling down)
 3. Colliding thermal bubbles (collision of hot and cold bubble)
 
-The hot and cold thermal bubbles are created by making sure the background potential temperature is either smaller or larger than that of the potential temperature profile inside the bubble, which follows a squared cosine profile. The bubble is then evolved in time. A Gauss-Legendre quadrature is employed for the initialization of the hydrostatic states as described in section 3.4.1 in this [article](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3989). We focus on the array-based implementation of the quadrature computation. A simple element-wise implementation ([credits](https://github.com/mrnorman/miniWeather)) of numerical integration is given below, where a two dimension matrix of quadrature points is created for each cell and reduced along the two dimensions before writing into the respective conservative variable.
+The hot and cold thermal bubbles are created by making sure the background potential temperature is either smaller or larger than that of the potential temperature profile inside the bubble, which follows a squared cosine profile. The bubble is then evolved in time. A Gauss-Legendre quadrature is employed for the initialization of the hydrostatic states as described in section 3.4.1 in this [article](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3989). We focus on the array-based implementation of the quadrature computation. A simple element-wise implementation ([credits](https://github.com/mrnorman/miniWeather)) of numerical integration is given below, where a two dimension matrix of quadrature points is created for each cell and reduced along the two dimensions before writing into the respective conservative variable (see [original code](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_serial.cpp#L536)).
 ```
 for (k=0; k<nz+2*hs; k++) {
   for (i=0; i<nx+2*hs; i++) {
@@ -121,6 +119,10 @@ fields.state[0, ...] = np.multiply(r, Quadrature.qweights_outer).sum(axis=-1).su
 
 ## Animations
 Simulations of supported configurations mentioned above were performed for an extended period of time (several tens of thousands of timesteps). Check out the [script](tools/make_images.py) on how to create images that can be used to create animations. For users interested in changing the dimensions of the domain, make sure to also change the radius of the bubble in [initial_conditions.py](pyminiweather/ics/initial_conditions.py) that uses the function [sample_ellipse_cosine](pyminiweather/utils/utils.py). 
+
+<!--
+(Contour plots of potential temperature; red is high and blue is small)
+-->
 
 ### Rising thermal bubble
 This simulates the rising of a dry warm bubble due to density differences (buoyancy effects). See section 3(b) in [this](https://journals.ametsoc.org/view/journals/mwre/143/12/mwr-d-15-0134.1.xml) article for more information on the setup for rising thermal bubble simulation
@@ -194,7 +196,7 @@ TO BE UPDATED
 
 WORK IN PROGRESS. THIS IS LIKELY TO CHANGE.
 
-The user can request data to be written to a file at periodic intervals by passing a integer number of timesteps to `output-freq`. As long as this number is greater than zero and less than the total number of timesteps, the conserved variables and derived quantities will be written to two differnet files. The data gets appened to the same set of files after the first time step, so if there is an existing file that is named either `PyMiniWeatherData.txt` or `PyMiniWeatherData_svars.txt`, you will have to remove them before a new simulation. Once the data is written to these files, they can be post-processed using the `make_images.py` script in the `tools` directory.
+The user can request data to be written to a file at periodic intervals by passing a integer number of timesteps to `output-freq`. As long as this number is greater than zero and less than the total number of timesteps, the conserved variables and derived quantities will be written to two different files. The data gets appened to the same set of files after the first time step, so if there is an existing file that is named either `PyMiniWeatherData.txt` or `PyMiniWeatherData_svars.txt`, you will have to remove them before a new simulation. Once the data is written to these files, they can be post-processed using the `make_images.py` script in the `tools` directory.
 
 Currently, PyMiniWeather dumps 2D slices of 3D and 4D arrays and reshapes them back to their original shape based on the inputs passed to the script `make_images.py`. The above script should dump contour plots of potential temperature (variable index: 3) in the `post/images` directory. Note that the `ntimesteps` in `make_images.py` refers to the number of timesteps that the data file contains which in the above example is not `3000` but `3` since the output was written every `1000` timesteps.
 
