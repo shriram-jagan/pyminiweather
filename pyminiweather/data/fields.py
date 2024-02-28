@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Tuple
 
 from pyminiweather import numpy as np
 
@@ -48,7 +48,7 @@ class Fields:
     fourth_order_kernel: np.ndarray
     first_order_kernel: np.ndarray
 
-    shape: tuple
+    shape: Tuple
 
 
 def initialize_fields(params):

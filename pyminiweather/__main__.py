@@ -1,7 +1,7 @@
 import argparse
 
 from pyminiweather import numpy as np
-from pyminiweather.data import Fields, initialize_fields
+from pyminiweather.data import initialize_fields
 from pyminiweather.ics import init
 from pyminiweather.io import Writer
 from pyminiweather.mesh import MeshData

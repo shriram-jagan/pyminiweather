@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any, Tuple
 
 from pyminiweather import numpy as np
-from pyminiweather.data import Constants, Quadrature
+from pyminiweather.data import Constants 
 from pyminiweather.utils import sample_ellipse_cosine
 
 

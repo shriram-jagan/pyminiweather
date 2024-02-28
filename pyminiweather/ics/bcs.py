@@ -2,7 +2,7 @@ from typing import Dict
 
 from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM
 from pyminiweather import numpy as np
-from pyminiweather.data import Fields, initialize_fields
+from pyminiweather.data import Fields 
 
 
 def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: str):

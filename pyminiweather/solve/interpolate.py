@@ -3,7 +3,6 @@ from typing import Dict
 from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM, convolve
 from pyminiweather import numpy as np
 from pyminiweather.data import Constants, Fields
-from pyminiweather.ics import Directions
 
 
 def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):

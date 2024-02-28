@@ -1,9 +1,7 @@
-from dataclasses import dataclass
 from typing import Dict
 
-from pyminiweather import meshgrid
 from pyminiweather import numpy as np
-from pyminiweather.data import Constants, Fields, Quadrature, initialize_fields
+from pyminiweather.data import Constants, Fields, Quadrature 
 from .initial_conditions import CCQInitFactory, VCEQInitFactory
 from pyminiweather.mesh import MeshData
 
@@ -12,10 +10,6 @@ def init(fields: Fields, params: Dict, Mesh: MeshData):
     xlen = params["xlen"]
     dx = params["dx"]
     dz = params["dz"]
-    nx = params["nx"]
-    nz = params["nz"]
-    hs = params["hs"]
-    s = params["s"]
     ic_type = params["ic_type"]
 
     C0 = Constants.C0.value

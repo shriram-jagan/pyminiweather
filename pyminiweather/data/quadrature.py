@@ -1,5 +1,3 @@
-from enum import Enum
-
 from pyminiweather import meshgrid
 from pyminiweather import numpy as np
 
