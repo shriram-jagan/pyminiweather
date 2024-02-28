@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Tuple
 
 from pyminiweather import numpy as np
-from pyminiweather.data import Constants 
+from pyminiweather.data import Constants
 from pyminiweather.utils import sample_ellipse_cosine
 
 

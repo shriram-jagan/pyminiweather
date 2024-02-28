@@ -1,7 +1,7 @@
 from typing import Dict
 
 from pyminiweather import numpy as np
-from pyminiweather.data import Constants, Fields, Quadrature 
+from pyminiweather.data import Constants, Fields, Quadrature
 from .initial_conditions import CCQInitFactory, VCEQInitFactory
 from pyminiweather.mesh import MeshData
 
