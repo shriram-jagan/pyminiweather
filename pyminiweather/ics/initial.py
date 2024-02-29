@@ -4,8 +4,9 @@ from typing import Dict
 from pyminiweather import meshgrid
 from pyminiweather import numpy as np
 from pyminiweather.data import Constants, Fields, Quadrature, initialize_fields
-from .initial_conditions import CCQInitFactory, VCEQInitFactory
 from pyminiweather.mesh import MeshData
+
+from .initial_conditions import CCQInitFactory, VCEQInitFactory
 
 
 def init(fields: Fields, params: Dict, Mesh: MeshData):

@@ -7,6 +7,7 @@ from pyminiweather.io import Writer
 from pyminiweather.mesh import MeshData
 from pyminiweather.post import compute_solution_variables, compute_stats
 from pyminiweather.solve import evolve
+from pyminiweather.utils import TimedCodeBlock, time
 
 
 def get_parser():
@@ -49,6 +50,13 @@ def get_parser():
         default=10,
         dest="nsteps",
         help="Number of time steps (default: 10)",
+    )
+    parser.add_argument(
+        "--nwarmups",
+        type=int,
+        default=0,
+        dest="nwarmups",
+        help="Number of wamup time steps (default: 0)",
     )
     parser.add_argument(
         "--ic-type",
@@ -145,9 +153,10 @@ def main():
         for k, v in params.items():
             print(f"{k:25s} {v}")
 
-    fields = initialize_fields(params)
-    mesh = MeshData(params)
-    init(fields, params, mesh)
+    with TimedCodeBlock(label="Elapsed time for initialization"):
+        fields = initialize_fields(params)
+        mesh = MeshData(params)
+        init(fields, params, mesh)
 
     total_mass_start, total_energy_start = compute_stats(params, fields)
     print(
@@ -156,22 +165,29 @@ def main():
         flush=True,
     )
 
-    for istep in range(params["nsteps"]):
-        # I/O and print stats
-        if params["output_freq"] > 0 and (istep + 1) % params["output_freq"] == 0:
-            print(
-                f"Step: {istep}, max(rho*t): {fields.state[3].max()}",
-                flush=True,
-            )
-            fname, append = params["filename"].split(".")
-            Writer.write_state(params["filename"], fields)
-            Writer.write_array(
-                fname + "_svars." + append,
-                compute_solution_variables(params, fields),
-            )
+    if params["nwarmups"]:
+        # No I/O during warmups
+        with TimedCodeBlock(label="Elapsed time for warmups"):
+            for _ in range(params["nwarmups"]):
+                evolve(params, fields, mesh, dt=params["dt"])
 
-        # step through in time
-        evolve(params, fields, mesh, dt=params["dt"])
+    with TimedCodeBlock(label="Elapsed time for timestepping"):
+        for istep in range(params["nsteps"]):
+            # I/O and print stats
+            if params["output_freq"] > 0 and (istep + 1) % params["output_freq"] == 0:
+                print(
+                    f"Step: {istep}, max(rho*t): {fields.state[3].max()}",
+                    flush=True,
+                )
+                fname, append = params["filename"].split(".")
+                Writer.write_state(params["filename"], fields)
+                Writer.write_array(
+                    fname + "_svars." + append,
+                    compute_solution_variables(params, fields),
+                )
+
+            # step through in time
+            evolve(params, fields, mesh, dt=params["dt"])
 
     total_mass_end, total_energy_end = compute_stats(params, fields)
     print(
