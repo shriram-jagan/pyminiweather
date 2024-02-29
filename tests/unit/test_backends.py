@@ -1,9 +1,3 @@
-import pytest
-
-import cunumeric as np
-import numpy as num
-
-
 def test_backends():
     """Compare numpy and cunumeric for different backends"""
 

@@ -9,7 +9,13 @@ addopts = [
 
 
 [tool.ruff]
-line-length = 79
+line-length = 88
+exclude = [
+  ".git",
+  ".ipynb_checkpoints",
+]
+
+[tool.ruff.lint]
 select = [
   "E",  # pycodestyle
   "F",  # pyflakes
@@ -17,9 +23,8 @@ select = [
 ]
 
 
-[tool.ruff.lint]
 # stop issuing ignore warnings on __init__.py
-ignore-init-module-imports = true
+ignore-init-module-imports = true 
 
 [per-file-ignores]
-"__init__.py" = ["E402"]
+"__init__.py" = ["F401"]

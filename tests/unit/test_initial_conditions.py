@@ -3,9 +3,9 @@ import pytest
 
 from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM
 from pyminiweather.__main__ import get_parser
-from pyminiweather.data import Fields, initialize_fields
-from pyminiweather.ics.initial_conditions import CCQInitFactory
+from pyminiweather.data import initialize_fields
 from pyminiweather.ics import init
+from pyminiweather.ics.initial_conditions import CCQInitFactory
 from pyminiweather.mesh import MeshData
 
 

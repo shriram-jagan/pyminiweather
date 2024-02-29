@@ -3,10 +3,10 @@ from typing import Tuple
 
 if "LEGATE_MAX_DIM" in os.environ and "LEGATE_MAX_FIELDS" in os.environ:
     import cunumeric as numpy
-    from cunumeric import convolve as convolve
+    from cunumeric import convolve as convolve  # noqa: F401
 else:
     import numpy as numpy
-    from scipy.signal import convolve2d as convolve
+    from scipy.signal import convolve2d as convolve  # noqa: F401
 
 print(f"Imported numpy backend: {numpy.__name__}")
 

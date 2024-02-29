@@ -6,7 +6,7 @@ from pathlib import Path
 import numpy as np
 from matplotlib import pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from utils import Params, make_dataclass_from_args
+from utils import make_dataclass_from_args
 
 from pyminiweather.mesh import MeshData
 
@@ -137,7 +137,7 @@ mesh = MeshData(mesh_params)
 image_directory = Path(params.directory) / "images"
 if not image_directory.exists():
     warnings.warn(
-        f"Make sure the images sub-directory inside"
+        "Make sure the images sub-directory inside"
         " {params.directory} exists AND writeable"
     )
 

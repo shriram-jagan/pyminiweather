@@ -1,9 +1,8 @@
 import cunumeric as np
-import numpy as num
 import pytest
 
 from pyminiweather.__main__ import get_parser
-from pyminiweather.data import Fields, initialize_fields
+from pyminiweather.data import initialize_fields
 from pyminiweather.solve import interpolate_x, interpolate_z
 
 

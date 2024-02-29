@@ -1,1 +1,1 @@
-from .io import Writer
+from .io import Writer  # noqa: F401
