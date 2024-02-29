@@ -6,3 +6,20 @@ testpaths = ["tests"]
 addopts = [
     "--import-mode=importlib",
 ]
+
+
+[tool.ruff]
+line-length = 79
+select = [
+  "E",  # pycodestyle
+  "F",  # pyflakes
+  "I",  # isort
+]
+
+
+[tool.ruff.lint]
+# stop issuing ignore warnings on __init__.py
+ignore-init-module-imports = true
+
+[per-file-ignores]
+"__init__.py" = ["E402"]
