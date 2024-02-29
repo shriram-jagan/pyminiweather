@@ -14,7 +14,10 @@ def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
     state = fields.state if state is None else state
 
     for ivar in range(fields.nvariables):
-        fields.vals_x[ivar, ...] = convolve(state[ivar, 2 : nz + 2, :], fields.fourth_order_kernel[np.newaxis, :], mode="same",
+        fields.vals_x[ivar, ...] = convolve(
+            state[ivar, 2 : nz + 2, :],
+            fields.fourth_order_kernel[np.newaxis, :],
+            mode="same",
         )[:, 2:-1]
 
         fields.d3_vals_x[ivar, ...] = convolve(
