@@ -7,6 +7,9 @@ addopts = [
     "--import-mode=importlib",
 ]
 
+[tool.black]
+line-length = 79
+
 
 [tool.ruff]
 line-length = 88
@@ -16,15 +19,28 @@ exclude = [
 ]
 
 [tool.ruff.lint]
+
 select = [
   "E",  # pycodestyle
   "F",  # pyflakes
   "I",  # isort
 ]
 
+fixable = ["ALL"]
+
+unfixable = []
+
+# line-length violation fixes are handled by Black
+ignore = ["E501"]
+
+# E402: Import violations in __init__.py
+# source: https://docs.astral.sh/ruff/configuration/
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["E402"]
+"**/{tests,docs,tools}/*" = ["E402"]
 
 # stop issuing ignore warnings on __init__.py
-ignore-init-module-imports = true 
+#ignore-init-module-imports = true 
 
-[per-file-ignores]
-"__init__.py" = ["F401"]
+#[per-file-ignores]
+#"__init__.py" = ["F401"]

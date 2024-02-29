@@ -1,4 +1,5 @@
 import cunumeric as np
+import pytest
 from scipy.signal import convolve2d
 
 

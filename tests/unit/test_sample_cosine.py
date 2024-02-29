@@ -1,7 +1,8 @@
 import cunumeric as np
+import pytest
 
 from pyminiweather.__main__ import get_parser
-from pyminiweather.data import Constants, initialize_fields
+from pyminiweather.data import Constants
 from pyminiweather.mesh import MeshData
 from pyminiweather.utils import sample_ellipse_cosine
 
@@ -18,7 +19,6 @@ def test_sample_ellipse_cosine():
     params["dx"] = params["xlen"] / params["nx"]
     params["dz"] = params["zlen"] / params["nz"]
 
-    fields = initialize_fields(params)
     mesh = MeshData(params)
 
     x, z = mesh.get_mesh_int_ext()
@@ -47,7 +47,6 @@ def test_sample_ellipse_cosine_cosine_dist():
     params["dx"] = params["xlen"] / params["nx"]
     params["dz"] = params["zlen"] / params["nz"]
 
-    fields = initialize_fields(params)
     mesh = MeshData(params)
 
     x, z = mesh.get_mesh_int_ext()

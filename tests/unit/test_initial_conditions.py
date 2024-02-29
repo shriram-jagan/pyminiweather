@@ -5,14 +5,11 @@ from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import initialize_fields
 from pyminiweather.ics import init
-from pyminiweather.ics.initial_conditions import CCQInitFactory
 from pyminiweather.mesh import MeshData
 
 
 def test_thermal():
     """Make sure that the thermal initial condition is correct"""
-    ic_type: str = "thermal"
-    init_interior = CCQInitFactory(ic_type)
 
     parser = get_parser()
     args, _ = parser.parse_known_args()
