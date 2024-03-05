@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict
 
-from pyminiweather import meshgrid
 from pyminiweather import numpy as np
 from pyminiweather.data import Constants, Fields, Quadrature, initialize_fields
-from pyminiweather.mesh import MeshData
+from pyminiweather.mesh import MeshData, meshgrid
 
 from .initial_conditions import CCQInitFactory, VCEQInitFactory
 

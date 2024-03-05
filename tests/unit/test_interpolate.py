@@ -23,6 +23,8 @@ def test_interpolate_z():
         [-1.0 / 12, 7.0 / 12, 7.0 / 12, -1.0 / 12], dtype=np.float64
     )
 
+    # TODO
+    print(f"Test invalid", flush=True)
     interpolate_z(params, fields, fields.state)
 
     assert True
@@ -44,8 +46,10 @@ def test_interpolate_x():
         [-1.0 / 12, 7.0 / 12, 7.0 / 12, -1.0 / 12], dtype=np.float64
     )
 
+    print(f"Test invalid", flush=True)
     interpolate_x(params, fields, fields.state)
 
+    # TODO
     assert True
 
 

@@ -1,9 +1,10 @@
 from typing import Dict
 
-from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM, convolve
+from pyminiweather import IDS
 from pyminiweather import numpy as np
 from pyminiweather.data import Constants, Fields
 from pyminiweather.ics import Directions
+from pyminiweather import convolve
 
 
 def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
@@ -62,29 +63,29 @@ def compute_flux_x(params: Dict, fields: Fields):
     C0 = Constants.C0.value
 
     rho = (
-        fields.vals_x[ID_DENS, 0:nz, 0 : nx + 1]
+        fields.vals_x[IDS.DENS, 0:nz, 0 : nx + 1]
         + fields.hy_dens_cell[hs : nz + hs, np.newaxis]
     )
-    u = fields.vals_x[ID_UMOM, 0:nz, 0 : nx + 1] / rho
-    w = fields.vals_x[ID_WMOM, 0:nz, 0 : nx + 1] / rho
+    u = fields.vals_x[IDS.UMOM, 0:nz, 0 : nx + 1] / rho
+    w = fields.vals_x[IDS.WMOM, 0:nz, 0 : nx + 1] / rho
     t = (
-        fields.vals_x[ID_RHOT, 0:nz, 0 : nx + 1]
+        fields.vals_x[IDS.RHOT, 0:nz, 0 : nx + 1]
         + fields.hy_dens_theta_cell[hs : nz + hs, np.newaxis]
     ) / rho
 
     pressure = C0 * np.power(rho * t, gamma)
 
-    fields.flux[ID_DENS, 0:nz, 0 : nx + 1] = (
-        rho * u - hv_coeff * fields.d3_vals_x[ID_DENS]
+    fields.flux[IDS.DENS, 0:nz, 0 : nx + 1] = (
+        rho * u - hv_coeff * fields.d3_vals_x[IDS.DENS]
     )
-    fields.flux[ID_UMOM, 0:nz, 0 : nx + 1] = (
-        rho * u**2 + pressure - hv_coeff * fields.d3_vals_x[ID_UMOM]
+    fields.flux[IDS.UMOM, 0:nz, 0 : nx + 1] = (
+        rho * u**2 + pressure - hv_coeff * fields.d3_vals_x[IDS.UMOM]
     )
-    fields.flux[ID_WMOM, 0:nz, 0 : nx + 1] = (
-        rho * u * w - hv_coeff * fields.d3_vals_x[ID_WMOM]
+    fields.flux[IDS.WMOM, 0:nz, 0 : nx + 1] = (
+        rho * u * w - hv_coeff * fields.d3_vals_x[IDS.WMOM]
     )
-    fields.flux[ID_RHOT, 0:nz, 0 : nx + 1] = (
-        rho * u * t - hv_coeff * fields.d3_vals_x[ID_RHOT]
+    fields.flux[IDS.RHOT, 0:nz, 0 : nx + 1] = (
+        rho * u * t - hv_coeff * fields.d3_vals_x[IDS.RHOT]
     )
 
 
@@ -99,13 +100,13 @@ def compute_flux_z(params: Dict, fields: Fields):
     C0 = Constants.C0.value
 
     rho = (
-        fields.vals_z[ID_DENS, 0 : nz + 1, 0:nx]
+        fields.vals_z[IDS.DENS, 0 : nz + 1, 0:nx]
         + fields.hy_dens_int[0 : nz + 1, np.newaxis]
     )
-    u = fields.vals_z[ID_UMOM, 0 : nz + 1, 0:nx] / rho
-    w = fields.vals_z[ID_WMOM, 0 : nz + 1, 0:nx] / rho
+    u = fields.vals_z[IDS.UMOM, 0 : nz + 1, 0:nx] / rho
+    w = fields.vals_z[IDS.WMOM, 0 : nz + 1, 0:nx] / rho
     t = (
-        fields.vals_z[ID_RHOT, 0 : nz + 1, 0:nx]
+        fields.vals_z[IDS.RHOT, 0 : nz + 1, 0:nx]
         + fields.hy_dens_theta_int[0 : nz + 1, np.newaxis]
     ) / rho
     pressure = (
@@ -117,20 +118,20 @@ def compute_flux_z(params: Dict, fields: Fields):
     w[nz, :] = 0.0
 
     # update density
-    fields.d3_vals_z[ID_DENS, 0, :] = 0.0
-    fields.d3_vals_z[ID_DENS, nz, :] = 0.0
+    fields.d3_vals_z[IDS.DENS, 0, :] = 0.0
+    fields.d3_vals_z[IDS.DENS, nz, :] = 0.0
 
-    fields.flux[ID_DENS, 0 : nz + 1, 0:nx] = (
-        rho * w - hv_coeff * fields.d3_vals_z[ID_DENS]
+    fields.flux[IDS.DENS, 0 : nz + 1, 0:nx] = (
+        rho * w - hv_coeff * fields.d3_vals_z[IDS.DENS]
     )
-    fields.flux[ID_UMOM, 0 : nz + 1, 0:nx] = (
-        rho * w * u - hv_coeff * fields.d3_vals_z[ID_UMOM]
+    fields.flux[IDS.UMOM, 0 : nz + 1, 0:nx] = (
+        rho * w * u - hv_coeff * fields.d3_vals_z[IDS.UMOM]
     )
-    fields.flux[ID_WMOM, 0 : nz + 1, 0:nx] = (
-        rho * w**2 + pressure - hv_coeff * fields.d3_vals_z[ID_WMOM]
+    fields.flux[IDS.WMOM, 0 : nz + 1, 0:nx] = (
+        rho * w**2 + pressure - hv_coeff * fields.d3_vals_z[IDS.WMOM]
     )
-    fields.flux[ID_RHOT, 0 : nz + 1, 0:nx] = (
-        rho * w * t - hv_coeff * fields.d3_vals_z[ID_RHOT]
+    fields.flux[IDS.RHOT, 0 : nz + 1, 0:nx] = (
+        rho * w * t - hv_coeff * fields.d3_vals_z[IDS.RHOT]
     )
 
 
@@ -159,6 +160,6 @@ def compute_tend_z(params: Dict, fields: Fields, state: np.ndarray):
         )
 
     # add source term
-    fields.tend[ID_WMOM, 0:nz, 0:nx] -= (
-        state[ID_DENS, hs : nz + hs, hs : nx + hs] * Constants.grav.value
+    fields.tend[IDS.WMOM, 0:nz, 0:nx] -= (
+        state[IDS.DENS, hs : nz + hs, hs : nx + hs] * Constants.grav.value
     )

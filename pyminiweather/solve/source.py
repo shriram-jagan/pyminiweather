@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Dict
 
-from pyminiweather import ID_WMOM
+from pyminiweather import IDS
 from pyminiweather import numpy as np
 from pyminiweather.data import Fields
 from pyminiweather.mesh import MeshData
@@ -33,7 +33,7 @@ class GravityBCSourceTerm(SourceTerm):
             x, z, 0.01, params["xlen"] / 8, 1000.0, 500.0, 500.0
         )
 
-        fields.tend[ID_WMOM, :, :] += (
+        fields.tend[IDS.WMOM, :, :] += (
             wpert * fields.hy_dens_cell[2 : nz + 2, np.newaxis]
         )
 
