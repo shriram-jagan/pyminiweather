@@ -83,10 +83,7 @@ def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
 
 def compute_flux_x(params: Dict, fields: Fields):
     """
-    Computes the intermediate quantities that are used in the
-    computation of flux. These quantities represent the third
-    and first order interpolation of conserved quantities and
-    the stabilization term.
+    Computes the flux in x-direction
 
     Parameters:
     -----------
@@ -95,6 +92,7 @@ def compute_flux_x(params: Dict, fields: Fields):
 
     fields: Fields
         A dataclass that contains the simulation variables
+        that gets updated
     """
     nx = params["nx"]
     nz = params["nz"]
@@ -135,10 +133,7 @@ def compute_flux_x(params: Dict, fields: Fields):
 
 def compute_flux_z(params: Dict, fields: Fields):
     """
-    Computes the intermediate quantities that are used in the
-    computation of flux. These quantities represent the third
-    and first order interpolation of conserved quantities and
-    the stabilization term.
+    Computes the flux in z-direction
 
     Parameters:
     -----------
@@ -211,9 +206,8 @@ def compute_tend_x(params: Dict, fields: Fields, state: np.ndarray):
     nx = params["nx"]
     nz = params["nz"]
     dx = params["dx"]
-    nvariables = 4
 
-    for ivar in range(nvariables):
+    for ivar in range(fields.nvariables):
         fields.tend[ivar, 0:nz, 0:nx] = (
             -(fields.flux[ivar, 0:nz, 1 : nx + 1] - fields.flux[ivar, 0:nz, 0:nx]) / dx
         )
@@ -238,9 +232,8 @@ def compute_tend_z(params: Dict, fields: Fields, state: np.ndarray):
     nz = params["nz"]
     hs = params["hs"]
     dz = params["dz"]
-    nvariables = 4
 
-    for ivar in range(nvariables):
+    for ivar in range(fields.nvariables):
         fields.tend[ivar, 0:nz, 0:nx] = (
             -(fields.flux[ivar, 1 : nz + 1, 0:nx] - fields.flux[ivar, 0:nz, 0:nx]) / dz
         )
