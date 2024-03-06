@@ -1,7 +1,7 @@
 import cunumeric as np
 import numpy as num
 import pytest
-from scipy.signal import convolve2d as convolve
+from scipy.signal import convolve2d
 
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import Fields, initialize_fields
@@ -29,11 +29,9 @@ def test_interpolate_x():
 
     interpolate_x(params, fields)
     for variable in range(fields.nvariables):
-        out_scipy = convolve(
+        out_scipy = convolve2d(
             state_num[variable, 2 : nz + 2, :], kernel_num[np.newaxis, :], mode="same"
         )[:, 2:-1]
-        print(fields.vals_x[variable])
-        print(out_scipy)
         assert np.allclose(out_scipy, fields.vals_x[variable])
 
 
@@ -59,10 +57,40 @@ def test_interpolate_z():
 
     interpolate_z(params, fields)
     for variable in range(fields.nvariables):
-        out_scipy = convolve(
+        out_scipy = convolve2d(
             state_num[variable, :, 2 : nx + 2], kernel_num[:, np.newaxis], mode="same"
         )[2:-1, :]
         assert np.allclose(out_scipy, fields.vals_z[variable])
+
+
+def test_convolution():
+    """
+    Make sure cuNumeric convolution and scipy's convolve2D give
+    the same result
+    """
+
+    nx = 12
+    nz = 7
+    hs = 2
+
+    total = (nx + 2 * hs) * (nz + 2 * hs)
+
+    state = np.arange(total).astype(np.float64).reshape(nz + 2 * hs, nx + 2 * hs)
+    kernel = np.array([-1.0, 3.0, -3.0, 1.0])
+    kernel_2d = kernel[:, np.newaxis]
+
+    # Direction: z
+    out_np = np.convolve(state[:, 2 : nx + 2], kernel_2d, mode="same")
+    out_scipy = convolve2d(state[:, 2 : nx + 2], kernel_2d, mode="same")
+
+    assert np.allclose(out_np, out_scipy)
+
+    # Direction: x
+    kernel_2d = kernel[np.newaxis, :]
+    out_np = np.convolve(state[2 : nz + 2, :], kernel_2d, mode="same")
+    out_scipy = convolve2d(state[2 : nz + 2, :], kernel_2d, mode="same")
+
+    assert np.allclose(out_np, out_scipy)
 
 
 if __name__ == "__main__":
