@@ -7,9 +7,10 @@ from pyminiweather.utils import sample_ellipse_cosine
 
 
 def test_sample_ellipse_cosine():
-    """Choose the ellipse such that the distance
-    criteria is not satisified, so we should get zeros for
-    all elements but one"""
+    """
+    Choose the ellipse such that the distance criteria is not
+    satisified and we get zeros for all but one element.
+    """
 
     parser = get_parser()
     args, _ = parser.parse_known_args()
@@ -36,9 +37,10 @@ def test_sample_ellipse_cosine():
 
 
 def test_sample_ellipse_cosine_cosine_dist():
-    """Choose the ellipse such that the distance criteria
-    is satisifed for all elements, so we get a cosine
-    profile."""
+    """
+    Choose the ellipse such that the distance criteria is
+    satisifed for all elements and we get a cosine profile.
+    """
 
     parser = get_parser()
     args, _ = parser.parse_known_args()
