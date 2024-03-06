@@ -30,15 +30,15 @@ def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
 
     state = fields.state if state is None else state
 
-    for ivar in range(fields.nvariables):
-        fields.vals_x[ivar, ...] = convolve(
-            state[ivar, 2 : nz + 2, :],
+    for variable in range(fields.nvariables):
+        fields.vals_x[variable, ...] = convolve(
+            state[variable, 2 : nz + 2, :],
             fields.fourth_order_kernel[np.newaxis, :],
             mode="same",
         )[:, 2:-1]
 
-        fields.d3_vals_x[ivar, ...] = convolve(
-            state[ivar, 2 : nz + 2, :],
+        fields.d3_vals_x[variable, ...] = convolve(
+            state[variable, 2 : nz + 2, :],
             fields.first_order_kernel[np.newaxis, :],
             mode="same",
         )[:, 2:-1]
@@ -67,15 +67,15 @@ def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
 
     state = fields.state if state is None else state
 
-    for ivar in range(fields.nvariables):
-        fields.vals_z[ivar, ...] = convolve(
-            state[ivar, :, 2 : nx + 2],
+    for variable in range(fields.nvariables):
+        fields.vals_z[variable, ...] = convolve(
+            state[variable, :, 2 : nx + 2],
             fields.fourth_order_kernel[:, np.newaxis],
             mode="same",
         )[2:-1, :]
 
-        fields.d3_vals_z[ivar, ...] = convolve(
-            state[ivar, :, 2 : nx + 2],
+        fields.d3_vals_z[variable, ...] = convolve(
+            state[variable, :, 2 : nx + 2],
             fields.first_order_kernel[:, np.newaxis],
             mode="same",
         )[2:-1, :]
@@ -207,9 +207,13 @@ def compute_tend_x(params: Dict, fields: Fields, state: np.ndarray):
     nz = params["nz"]
     dx = params["dx"]
 
-    for ivar in range(fields.nvariables):
-        fields.tend[ivar, 0:nz, 0:nx] = (
-            -(fields.flux[ivar, 0:nz, 1 : nx + 1] - fields.flux[ivar, 0:nz, 0:nx]) / dx
+    for variable in range(fields.nvariables):
+        fields.tend[variable, 0:nz, 0:nx] = (
+            -(
+                fields.flux[variable, 0:nz, 1 : nx + 1]
+                - fields.flux[variable, 0:nz, 0:nx]
+            )
+            / dx
         )
 
 
@@ -233,9 +237,13 @@ def compute_tend_z(params: Dict, fields: Fields, state: np.ndarray):
     hs = params["hs"]
     dz = params["dz"]
 
-    for ivar in range(fields.nvariables):
-        fields.tend[ivar, 0:nz, 0:nx] = (
-            -(fields.flux[ivar, 1 : nz + 1, 0:nx] - fields.flux[ivar, 0:nz, 0:nx]) / dz
+    for variable in range(fields.nvariables):
+        fields.tend[variable, 0:nz, 0:nx] = (
+            -(
+                fields.flux[variable, 1 : nz + 1, 0:nx]
+                - fields.flux[variable, 0:nz, 0:nx]
+            )
+            / dz
         )
 
     # add source term
