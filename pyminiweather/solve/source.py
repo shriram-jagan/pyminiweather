@@ -24,8 +24,20 @@ class GravityBCSourceTerm(SourceTerm):
         super().__init__()
 
     def __call__(self, params: Dict, mesh: MeshData, fields: Fields):
-        """Updates tendency array in fields with source term associated
+        """
+        Updates tendency with the source term associated
         with Gravity boundary condition.
+
+        Parameters:
+        ----------
+        params: Dict
+            Dictionary with simulation parameters
+
+        mesh: MeshData
+            Class that stores coordinates at different points in the domain
+
+        fields: Fields
+            A dataclass that contains the simulation variables
         """
         nz = params["nz"]
         x, z = mesh.get_mesh_cell_centers()
@@ -39,7 +51,21 @@ class GravityBCSourceTerm(SourceTerm):
 
 
 def add_source_terms(params: Dict, mesh: MeshData, fields: Fields):
-    """Add source terms to tendencies."""
+    """
+    Add source terms to tendencies.
+
+    Parameters:
+    ----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    mesh: MeshData
+        Class that stores coordinates at different points in the domain
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    """
 
     sources = []
     if params["ic_type"] == "gravity":

@@ -29,28 +29,35 @@ def discrete_step(
     direction: Directions,
 ) -> None:
     """
-    Performs one timestep for the ODE. The timestep consists
-    of a halo exchange, a convolution for all variables
-    to interpolate the data, compute tendencies, and then update
-    the state variables.
+    Perform one discrete timestep for the ODE. A discrete step
+    consists of a halo exchange, an interpolation, and computation
+    of fluxes and tendencies. The conservative variables are then
+    updated.
 
     Parameters:
     ----------
-
     params: Dict
+        Dictionary with simulation parameters
 
     fields: Fields
+        A dataclass that contains the simulation variables
 
     state_init: np.ndarray
+        An array with conservative variables at the beginning of
+        the time step
 
     state_forcing: np.ndarray
+        An array with conservative variables at the current timestep
+        that is used for the RHS computation
 
     state_out: np.ndarray
+        An array with conservative variables that gets updated
 
     dt: float
+        Timestep
 
     direction: Directions
-
+        Direction for this substep
     """
 
     nz = params["nz"]
@@ -75,9 +82,23 @@ def discrete_step(
     )
 
 
-def evolve(params, fields, mesh, dt: float = 1e-4):
-    """THis function should discrete step with different fields
-    in different directions and switch the directions when needed."""
+def evolve(params, fields, mesh, dt: float = 1e-4) -> None:
+    """
+    Step through in time by one timestep of dt. This consists of
+    three discrete timesteps with the direction getting
+    switched automatically (between x and z)
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    mesh: MeshData
+        Class that stores coordinates at different points in the domain
+    """
 
     global reverse_direction
 

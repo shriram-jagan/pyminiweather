@@ -2,9 +2,14 @@ from pyminiweather.mesh import meshgrid
 from pyminiweather import numpy as np
 
 
-# TODO: Attributes should be immutable.
 class GaussianQuadrature:
-    """Contains Gauss-Legendre quadrature points and weights"""
+    """
+    Contains Gauss-Legendre quadrature points and weights.
+    A unit test will fail if he quadrature points and weights
+    are changed. Make sure to update the tests if these
+    values need to be updated.
+
+    """
 
     def __init__(self):
         self.__npoints: int = 3

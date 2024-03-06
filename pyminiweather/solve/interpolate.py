@@ -8,8 +8,23 @@ from pyminiweather import convolve
 
 
 def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
-    """Computes vals and d3_vals that are used in the
-    computation of tendencies and flux.
+    """
+    Computes the intermediate quantities that are used in the
+    computation of flux. These quantities represent the third
+    and first order interpolation of conserved quantities and
+    the stabilization term.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state: np.ndarray
+        An array with conservative variables at the current timesteps
+
     """
     nz = params["nz"]
 
@@ -30,8 +45,23 @@ def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
 
 
 def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
-    """Computes vals and d3_vals that are used in the
-    computation of tendencies and flux.
+    """
+    Computes the intermediate quantities that are used in the
+    computation of flux. These quantities represent the third
+    and first order interpolation of conserved quantities and
+    the stabilization term.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state: np.ndarray
+        An array with conservative variables at the current timesteps
+
     """
     nx = params["nx"]
 
@@ -52,6 +82,20 @@ def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
 
 
 def compute_flux_x(params: Dict, fields: Fields):
+    """
+    Computes the intermediate quantities that are used in the
+    computation of flux. These quantities represent the third
+    and first order interpolation of conserved quantities and
+    the stabilization term.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+    """
     nx = params["nx"]
     nz = params["nz"]
     hs = params["hs"]
@@ -90,6 +134,20 @@ def compute_flux_x(params: Dict, fields: Fields):
 
 
 def compute_flux_z(params: Dict, fields: Fields):
+    """
+    Computes the intermediate quantities that are used in the
+    computation of flux. These quantities represent the third
+    and first order interpolation of conserved quantities and
+    the stabilization term.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+    """
     nx = params["nx"]
     nz = params["nz"]
     dz = params["dz"]
@@ -136,6 +194,20 @@ def compute_flux_z(params: Dict, fields: Fields):
 
 
 def compute_tend_x(params: Dict, fields: Fields, state: np.ndarray):
+    """
+    Computes tendencies in x.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state: np.ndarray
+        An array with conservative variables at the current timesteps
+    """
     nx = params["nx"]
     nz = params["nz"]
     dx = params["dx"]
@@ -148,6 +220,20 @@ def compute_tend_x(params: Dict, fields: Fields, state: np.ndarray):
 
 
 def compute_tend_z(params: Dict, fields: Fields, state: np.ndarray):
+    """
+    Computes tendencies in z.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state: np.ndarray
+        An array with conservative variables at the current timesteps
+    """
     nx = params["nx"]
     nz = params["nz"]
     hs = params["hs"]

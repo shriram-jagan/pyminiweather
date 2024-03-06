@@ -78,7 +78,8 @@ class MeshData:
         return self.mesh_int_ext
 
     def get_mesh_cell_centers(self) -> Tuple[np.ndarray, np.ndarray]:
-        """Get coordinates of the mesh on the cell centers that includes
+        """
+        Get coordinates of the mesh on the cell centers that includes
         only the interior of the domain
 
         Returns:
@@ -101,6 +102,13 @@ class MeshData:
         return self.mesh_cell_centers
 
     def get_mesh_vertical_cell_edges(self) -> np.ndarray:
+        """
+        Get z-coordinates of (interior) cell edges at x=0/x=nx
+
+        Returns:
+        -------
+        One dimensional array with z-coordinates
+        """
         if self.mesh_vertical_cell_edges is not None:
             return self.mesh_vertical_cell_edges
 
@@ -111,6 +119,13 @@ class MeshData:
         return self.mesh_vertical_cell_edges
 
     def get_mesh_vertical_cell_centers_int_ext(self) -> np.ndarray:
+        """
+        Get z-coordinates at cell centers including the ghost points at x=0/x=nx
+
+        Returns:
+        -------
+        One dimensional array with z-coordinates
+        """
         if self.mesh_vertical_cell_centers_int_ext is not None:
             return self.mesh_vertical_cell_centers_int_ext
 

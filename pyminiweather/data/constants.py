@@ -2,6 +2,14 @@ from enum import Enum
 
 
 class Constants(float, Enum):
+    """
+    This class is an Enum that contains all the physical parameters
+    that don't change in the simulation.
+
+    A unit test will fail if the numbers in this class are modified,
+    so make sure to update the test if the parameters are updated.
+    """
+
     hv_beta = 0.05
 
     p0 = 1.0e5

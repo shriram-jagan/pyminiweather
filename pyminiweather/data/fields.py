@@ -6,6 +6,10 @@ from pyminiweather import numpy as np
 
 @dataclass
 class Fields:
+    """
+    This class contains solution variables and other persistent variables.
+    """
+
     # sizes
     nx: int
     nz: int
