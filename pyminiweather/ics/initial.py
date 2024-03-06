@@ -9,6 +9,23 @@ from .initial_conditions import CCQInitFactory, VCEQInitFactory
 
 
 def init(fields: Fields, params: Dict, Mesh: MeshData):
+    """
+    Initializes all the variables in the simulation using
+    the simulation parameters in params and on the mesh
+    represented by `mesh`.
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    Mesh: MeshData
+        Class that stores the coordinates of points in the domain
+
+    """
     xlen = params["xlen"]
     dx = params["dx"]
     dz = params["dz"]

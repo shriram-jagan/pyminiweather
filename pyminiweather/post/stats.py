@@ -36,6 +36,7 @@ def compute_stats(params: Dict, fields: Fields) -> float:
 
 
 def compute_solution_variables(params: Dict, fields: Fields) -> np.ndarray:
+    """Return the solution variables (Add more info)"""
     nx = params["nx"]
     nz = params["nz"]
     hs = params["hs"]

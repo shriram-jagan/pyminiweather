@@ -6,6 +6,25 @@ from pyminiweather.data import Fields, initialize_fields
 
 
 def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: str):
+    """
+    Set the boundary conditions in X (wall)
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state_forcing: np.ndarray
+        An array with conservative variables that is used for the
+        RHS computation
+
+    ic_type: str
+        Initial condition
+
+    """
     dz = params["dz"]
     nx = params["nx"]
     nz = params["nz"]
@@ -46,6 +65,25 @@ def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: s
 
 
 def set_bc_z(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: str):
+    """
+    Set the boundary conditions in Z (periodic)
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state_forcing: np.ndarray
+        An array with conservative variables that is used for the
+        RHS computation
+
+    ic_type: str
+        Initial condition
+
+    """
     nx = params["nx"]
     nz = params["nz"]
     hs = params["hs"]
