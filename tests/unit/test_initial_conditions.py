@@ -5,6 +5,7 @@ from pyminiweather import IDS
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import Fields, initialize_fields
 from pyminiweather.ics.initial_conditions import CCQInitFactory
+from pyminiweather.ics.initial_conditions import CollisionInterior
 from pyminiweather.ics import init
 from pyminiweather.mesh import MeshData
 
@@ -41,15 +42,44 @@ def test_thermal():
 
 
 def test_hydro_const_theta():
-    pass
+    """
+    Make sure hydrostatic density and potential temperature
+    are computed correctly.
+    """
+
+    c = CollisionInterior()
+
+    # no variation of potential temperature
+    assert c.hydro_const_theta(1.0)[1] == c.hydro_const_theta(100.0)[1]
+
+    # no variation with z; gradient(hydrostatic dens, z) = 0
+    nz = 25000
+    lz = 100.0
+    z = np.linspace(0, lz, nz)
+    out = c.hydro_const_theta(z)[0]
+    mean_gradient = np.gradient(out).mean()
+
+    assert np.isclose(mean_gradient, 0.0, atol=1e-4)
 
 
 def test_hydro_const_bvfreq():
-    pass
+    """
+    Check hydrostatic density and potential temperature are
+    computed correctly for a given bvfreq.
+    """
 
+    bv_freq0 = 0.02
+    nz = 25000
+    lz = 100.0
 
-def test_hydrostatic_quantities():
-    pass
+    z = np.linspace(0, lz, nz)
+
+    c = CollisionInterior()
+    out = c.hydro_const_bvfreq(z, bv_freq0)
+
+    # Check that the mean gradient is close to zero
+    assert np.isclose(np.gradient(out[0]).mean(), 0.0, atol=1e-4)
+    assert np.isclose(np.gradient(out[1]).mean(), 0.0, atol=1e-4)
 
 
 if __name__ == "__main__":
