@@ -2,7 +2,7 @@ import cunumeric as np
 import numpy as num
 import pytest
 
-from pyminiweather import meshgrid
+from pyminiweather.mesh import meshgrid
 
 
 def test_meshgrid():

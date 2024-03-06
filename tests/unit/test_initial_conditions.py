@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM
+from pyminiweather import IDS
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import Fields, initialize_fields
 from pyminiweather.ics.initial_conditions import CCQInitFactory
@@ -27,16 +27,16 @@ def test_thermal():
     init(fields, params, mesh)
 
     state = fields.state
-    shape = state[ID_DENS].shape
+    shape = state[IDS.DENS].shape
 
     # density, u-vel, w-vel should be zeros
-    assert np.all(state[ID_DENS] == np.zeros(shape))
-    assert np.all(state[ID_UMOM] == np.zeros(shape))
-    assert np.all(state[ID_WMOM] == np.zeros(shape))
+    assert np.all(state[IDS.DENS] == np.zeros(shape))
+    assert np.all(state[IDS.UMOM] == np.zeros(shape))
+    assert np.all(state[IDS.WMOM] == np.zeros(shape))
 
     # ideally, we should check this against a cosine profile,
     # but for now, making sure that it is not zero is fine
-    count = np.count_nonzero(state[ID_RHOT])
+    count = np.count_nonzero(state[IDS.RHOT])
     assert count > 0
 
 

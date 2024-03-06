@@ -1,7 +1,32 @@
 from typing import Dict, Tuple
 
-from pyminiweather import meshgrid
 from pyminiweather import numpy as np
+
+
+def meshgrid(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """This is equivalent to numpy's meshgrid for two one-dimensional
+    input arrays without all the bells and whistles.
+
+    Parameters:
+    ----------
+    x: np.ndarray
+        1D array denoting x-coordinates
+    y: np.ndarray
+        1D array denoting y-coordinates
+
+    Returns:
+    -------
+    A tuple of two-dimensional arrays that correspond to (x, y) pairs
+    in a cartesian coordinate system
+    """
+    if np.__name__ == "numpy":
+        return np.meshgrid(x, y)
+    elif np.__name__ == "cunumeric":
+        assert x.ndim == y.ndim == 1
+
+        return (np.tile(x, (y.size, 1)), np.tile(y, (x.size, 1)).T)
+    else:
+        raise ValueError("Unknown backend")
 
 
 class MeshData:
@@ -53,7 +78,8 @@ class MeshData:
         return self.mesh_int_ext
 
     def get_mesh_cell_centers(self) -> Tuple[np.ndarray, np.ndarray]:
-        """Get coordinates of the mesh on the cell centers that includes
+        """
+        Get coordinates of the mesh on the cell centers that includes
         only the interior of the domain
 
         Returns:
@@ -76,6 +102,13 @@ class MeshData:
         return self.mesh_cell_centers
 
     def get_mesh_vertical_cell_edges(self) -> np.ndarray:
+        """
+        Get z-coordinates of (interior) cell edges at x=0/x=nx
+
+        Returns:
+        -------
+        One dimensional array with z-coordinates
+        """
         if self.mesh_vertical_cell_edges is not None:
             return self.mesh_vertical_cell_edges
 
@@ -86,6 +119,13 @@ class MeshData:
         return self.mesh_vertical_cell_edges
 
     def get_mesh_vertical_cell_centers_int_ext(self) -> np.ndarray:
+        """
+        Get z-coordinates at cell centers including the ghost points at x=0/x=nx
+
+        Returns:
+        -------
+        One dimensional array with z-coordinates
+        """
         if self.mesh_vertical_cell_centers_int_ext is not None:
             return self.mesh_vertical_cell_centers_int_ext
 

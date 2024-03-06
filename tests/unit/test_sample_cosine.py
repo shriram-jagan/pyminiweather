@@ -1,9 +1,8 @@
 import cunumeric as np
 import numpy as num
-from pyminiweather import meshgrid
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import Constants, initialize_fields
-from pyminiweather.mesh import MeshData
+from pyminiweather.mesh import MeshData, meshgrid
 from pyminiweather.utils import sample_ellipse_cosine
 
 

@@ -1,11 +1,30 @@
 from typing import Dict
 
-from pyminiweather import ID_DENS, ID_RHOT, ID_UMOM, ID_WMOM
+from pyminiweather import IDS
 from pyminiweather import numpy as np
 from pyminiweather.data import Fields, initialize_fields
 
 
 def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: str):
+    """
+    Set the boundary conditions in X (wall)
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state_forcing: np.ndarray
+        An array with conservative variables that is used for the
+        RHS computation
+
+    ic_type: str
+        Initial condition
+
+    """
     dz = params["dz"]
     nx = params["nx"]
     nz = params["nz"]
@@ -29,82 +48,101 @@ def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: s
         indices = np.nonzero(cond)[0] + hs
 
         # i = 0, 1 for umom
-        state_forcing[ID_UMOM, indices, 0] = (
-            state_forcing[ID_DENS, indices, 0] + fields.hy_dens_cell[indices]
+        state_forcing[IDS.UMOM, indices, 0] = (
+            state_forcing[IDS.DENS, indices, 0] + fields.hy_dens_cell[indices]
         ) * 50.0
-        state_forcing[ID_UMOM, indices, 1] = (
-            state_forcing[ID_DENS, indices, 1] + fields.hy_dens_cell[indices]
+        state_forcing[IDS.UMOM, indices, 1] = (
+            state_forcing[IDS.DENS, indices, 1] + fields.hy_dens_cell[indices]
         ) * 50.0
 
         # i = 0, 1 for rho*t
-        state_forcing[ID_RHOT, indices, 0] = (
-            state_forcing[ID_DENS, indices, 0] + fields.hy_dens_cell[indices]
+        state_forcing[IDS.RHOT, indices, 0] = (
+            state_forcing[IDS.DENS, indices, 0] + fields.hy_dens_cell[indices]
         ) * 298.0 - fields.hy_dens_theta_cell[indices]
-        state_forcing[ID_RHOT, indices, 1] = (
-            state_forcing[ID_DENS, indices, 1] + fields.hy_dens_cell[indices]
+        state_forcing[IDS.RHOT, indices, 1] = (
+            state_forcing[IDS.DENS, indices, 1] + fields.hy_dens_cell[indices]
         ) * 298.0 - fields.hy_dens_theta_cell[indices]
 
 
 def set_bc_z(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: str):
+    """
+    Set the boundary conditions in Z (periodic)
+
+    Parameters:
+    -----------
+    params: Dict
+        Dictionary with simulation parameters
+
+    fields: Fields
+        A dataclass that contains the simulation variables
+
+    state_forcing: np.ndarray
+        An array with conservative variables that is used for the
+        RHS computation
+
+    ic_type: str
+        Initial condition
+
+    """
     nx = params["nx"]
     nz = params["nz"]
     hs = params["hs"]
 
     # W mom
-    state_forcing[ID_WMOM, 0, 0 : nx + 2 * hs] = 0.0
-    state_forcing[ID_WMOM, 1, 0 : nx + 2 * hs] = 0.0
-    state_forcing[ID_WMOM, nz + hs, 0 : nx + 2 * hs] = 0.0
-    state_forcing[ID_WMOM, nz + hs + 1, 0 : nx + 2 * hs] = 0.0
+    state_forcing[IDS.WMOM, 0, 0 : nx + 2 * hs] = 0.0
+    state_forcing[IDS.WMOM, 1, 0 : nx + 2 * hs] = 0.0
+    state_forcing[IDS.WMOM, nz + hs, 0 : nx + 2 * hs] = 0.0
+    state_forcing[IDS.WMOM, nz + hs + 1, 0 : nx + 2 * hs] = 0.0
 
     # U mom
-    state_forcing[ID_UMOM, 0, 0 : nx + 2 * hs] = (
-        state_forcing[ID_UMOM, hs, 0 : nx + 2 * hs]
+    state_forcing[IDS.UMOM, 0, 0 : nx + 2 * hs] = (
+        state_forcing[IDS.UMOM, hs, 0 : nx + 2 * hs]
         / fields.hy_dens_cell[hs]
         * fields.hy_dens_cell[0]
     )
-    state_forcing[ID_UMOM, 1, 0 : nx + 2 * hs] = (
-        state_forcing[ID_UMOM, hs, 0 : nx + 2 * hs]
+    state_forcing[IDS.UMOM, 1, 0 : nx + 2 * hs] = (
+        state_forcing[IDS.UMOM, hs, 0 : nx + 2 * hs]
         / fields.hy_dens_cell[hs]
         * fields.hy_dens_cell[1]
     )
 
-    state_forcing[ID_UMOM, nz + hs, 0 : nx + 2 * hs] = (
-        state_forcing[ID_UMOM, nz + hs - 1, 0 : nx + 2 * hs]
+    state_forcing[IDS.UMOM, nz + hs, 0 : nx + 2 * hs] = (
+        state_forcing[IDS.UMOM, nz + hs - 1, 0 : nx + 2 * hs]
         / fields.hy_dens_cell[nz + hs - 1]
         * fields.hy_dens_cell[nz + hs]
     )
-    state_forcing[ID_UMOM, nz + hs + 1, 0 : nx + 2 * hs] = (
-        state_forcing[ID_UMOM, nz + hs - 1, 0 : nx + 2 * hs]
+    state_forcing[IDS.UMOM, nz + hs + 1, 0 : nx + 2 * hs] = (
+        state_forcing[IDS.UMOM, nz + hs - 1, 0 : nx + 2 * hs]
         / fields.hy_dens_cell[nz + hs - 1]
         * fields.hy_dens_cell[nz + hs + 1]
     )
 
     # Density
-    state_forcing[ID_DENS, 0, 0 : nx + 2 * hs] = state_forcing[
-        ID_DENS, hs, 0 : nx + 2 * hs
+    state_forcing[IDS.DENS, 0, 0 : nx + 2 * hs] = state_forcing[
+        IDS.DENS, hs, 0 : nx + 2 * hs
     ]
-    state_forcing[ID_DENS, 1, 0 : nx + 2 * hs] = state_forcing[
-        ID_DENS, hs, 0 : nx + 2 * hs
+    state_forcing[IDS.DENS, 1, 0 : nx + 2 * hs] = state_forcing[
+        IDS.DENS, hs, 0 : nx + 2 * hs
     ]
 
-    state_forcing[ID_DENS, nz + hs, 0 : nx + 2 * hs] = state_forcing[
-        ID_DENS, nz + hs - 1, 0 : nx + 2 * hs
+    state_forcing[IDS.DENS, nz + hs, 0 : nx + 2 * hs] = state_forcing[
+        IDS.DENS, nz + hs - 1, 0 : nx + 2 * hs
     ]
-    state_forcing[ID_DENS, nz + hs + 1, 0 : nx + 2 * hs] = state_forcing[
-        ID_DENS, nz + hs - 1, 0 : nx + 2 * hs
+    state_forcing[IDS.DENS, nz + hs + 1, 0 : nx + 2 * hs] = state_forcing[
+        IDS.DENS, nz + hs - 1, 0 : nx + 2 * hs
     ]
 
     # Temperature
-    state_forcing[ID_RHOT, 0, 0 : nx + 2 * hs] = state_forcing[
-        ID_RHOT, hs, 0 : nx + 2 * hs
+    state_forcing[IDS.RHOT, 0, 0 : nx + 2 * hs] = state_forcing[
+        IDS.RHOT, hs, 0 : nx + 2 * hs
     ]
-    state_forcing[ID_RHOT, 1, 0 : nx + 2 * hs] = state_forcing[
-        ID_RHOT, hs, 0 : nx + 2 * hs
+    state_forcing[IDS.RHOT, 1, 0 : nx + 2 * hs] = state_forcing[
+        IDS.RHOT, hs, 0 : nx + 2 * hs
     ]
 
-    state_forcing[ID_RHOT, nz + hs, 0 : nx + 2 * hs] = state_forcing[
-        ID_RHOT, nz + hs - 1, 0 : nx + 2 * hs
+    state_forcing[IDS.RHOT, nz + hs, 0 : nx + 2 * hs] = state_forcing[
+        IDS.RHOT, nz + hs - 1, 0 : nx + 2 * hs
     ]
-    state_forcing[ID_RHOT, nz + hs + 1, 0 : nx + 2 * hs] = state_forcing[
-        ID_RHOT, nz + hs - 1, 0 : nx + 2 * hs
+    state_forcing[IDS.RHOT, nz + hs + 1, 0 : nx + 2 * hs] = state_forcing[
+        IDS.RHOT, nz + hs - 1, 0 : nx + 2 * hs
     ]

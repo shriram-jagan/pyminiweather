@@ -80,9 +80,8 @@ def get_parser():
             2,
         ],
         dest="hs",
-        help="This gives you an illusion of choice. "
-        "This relates to the width of the stencil in the "
-        "discretization and cannot be changed.",
+        help="This relates to the width of the stencil in the "
+        "discretization and cannot be changed at the moment.",
     )
     parser.add_argument(
         "--s",
@@ -92,9 +91,8 @@ def get_parser():
             4,
         ],
         dest="s",
-        help="This gives you an illusion of choice. "
-        "This relates to the size of interpolating "
-        "kernel and cannot be changed.",
+        help="This relates to the size of interpolating "
+        "kernel and cannot be changed at the moment.",
     )
     parser.add_argument(
         "--max-speed",
