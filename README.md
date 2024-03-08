@@ -39,10 +39,10 @@ The 2D Euler equations are a simplified form of Navier-Stokes equations without 
 
 $$ 
 \begin{align}
-\dfrac{\partial \rho   }{\partial t} &+ \dfrac{ \partial}{\partial x} \left( \rho u \right)  + \dfrac{\partial}{\partial z} \left( \rho w \right) = 0 \\
-\dfrac{\partial \rho u }{\partial t} &+ \dfrac{ \partial}{\partial x} \left( \rho u^2 + p \right) + \dfrac{\partial }{\partial z} \left( \rho w u \right) = 0 \\
-\dfrac{\partial \rho w }{\partial t} &+ \dfrac{ \partial }{\partial x} \left( \rho u w \right) + \dfrac{\partial}{\partial z} \left( \rho w^{2} + p \right) = -\rho g \\
-\dfrac{\partial \rho \theta }{\partial t} &+ \dfrac{ \partial }{\partial x} \left( \rho u \theta \right)  + \dfrac{\partial}{\partial z} \left( \rho w \theta \right) = 0 \\
+\dfrac{\partial }{\partial t} \left( \rho \right) &+ \dfrac{ \partial}{\partial x} \left( \rho u \right)  + \dfrac{\partial}{\partial z} \left( \rho w \right) = 0 \\
+\dfrac{\partial }{\partial t} \left( \rho u \right) &+ \dfrac{ \partial}{\partial x} \left( \rho u^2 + p \right) + \dfrac{\partial }{\partial z} \left( \rho w u \right) = 0 \\
+\dfrac{\partial}{\partial t} \left( \rho w \right) &+ \dfrac{ \partial }{\partial x} \left( \rho u w \right) + \dfrac{\partial}{\partial z} \left( \rho w^{2} + p \right) = -\rho g \\
+\dfrac{\partial }{\partial t} \left( \rho \theta \right) &+ \dfrac{ \partial }{\partial x} \left( \rho u \theta \right)  + \dfrac{\partial}{\partial z} \left( \rho w \theta \right) = 0 \\
 \end{align} 
 $$
 
@@ -50,7 +50,7 @@ $$
 
 PyMiniWeather currently supports periodic boundary conditions in x-direction and wall boundary conditions in z-direction and solves the governing equations for a rectangular domain that is twice as large in x- as in z- direction. A hyperviscosity term for stabilization is introduced by including a fourth derivative of the conservative variables in the governing equations.
 
-The solution variables are stored at the cell centers and the fluxes and tendencies are stored at the cell edges. As is often the case with finite volume discretization, approximating the fluxes at the edges based on the quantities at cell centers involves reconstruction of the solution. In this implementation, a fourth-order accurate linear interpolation is employed for reconstruction of the solution variables and a first order accurate interpolation for the hyperviscosity term. 
+The solution variables are stored at the cell centers and the fluxes and tendencies are stored at the cell edges. As is often the case with finite volume discretization, approximating the fluxes at the edges based on the quantities at cell centers involves reconstruction of the solution. In this implementation, a fourth-order accurate linear interpolation is employed for reconstruction of the solution variables and a first order accurate interpolation for the hyperviscosity term.
 
 #### Learning how to implement linear interpolation with custom kernels
 
@@ -71,11 +71,11 @@ for (int k=0; k<nz; k++) {
 }
 ```
 
-The above implementation consists of selecting a `window` of values from a conservative variable into the variable `stencil`. The window size in this example is controlled by the variable `sten_size`. The variables `vals` and `d3_vals `, which represent the fourth order and first order interpolation of conserved quantities and hyperviscosity term respectively, is obtained by a dot product of `weights` and the conserved variable. It is important to note that these two variables are temporary variables in the computation and that their values for each coordinate in the grid is independent of the rest.The operation is then repeated for all the variables and then the window is moved by one unit in the x-direction and eventually by one unit in the z-direction. See the figure below for a pictorial representation of the workflow.
+The above implementation consists of looping over the spatial extents relevant to the output of the computation for all the four conservative variables (`NUM_VARS`). This helps select `window` of values from a conservative variable onto to the interpolating kernel or `stencil` as it is referred in the above code snippet. The window size in this example is controlled by the variable `sten_size`. The variables `vals` and `d3_vals `, which represent the fourth order and first order interpolation of conserved quantities and hyperviscosity term respectively, is obtained by a dot product of `weights` and the conserved variable. It is important to note that these two variables are temporary variables in the computation and that their values for each coordinate in the grid is independent of the rest. The operation is then repeated for all the variables and then the window is moved by one unit in the x-direction and eventually by one unit in the z-direction. See the figure below for a pictorial representation of the workflow.
 
 ![Alt text](images/convolution_1.png)
 
-Converting this code snippet to use NumPy or any other array-based library would require storing the temporary variables (`vals` and `d3_vals` in the above snippet) into a full-blown array. Additionally, computation for all grid points must be vectorized and then repeated for all the variables. Since `weights` is spatially independent, it is possible to extend the dimension of `weights` in the z-dimension and loop over just the x-direction. 
+Converting this code snippet to use NumPy or any other array-based library would require storing the temporary variables (`vals` and `d3_vals` in the above snippet) into an array. Additionally, computation for all grid points must be vectorized and then repeated for all the variables. Since `weights` is spatially independent, it is possible to extend the dimension of `weights` in the z-dimension and loop over just the x-direction. 
 
 ![Alt text](images/convolution_2.png)
 
@@ -103,7 +103,7 @@ Note that for the NumPy backend, we use the `convolve2D` API from SciPy since Nu
 
 Array programming patterns for simple element-wise operations that are trivial in C are different in array programming languages like Python. There are two such patterns in PyMiniWeather - a moving window operation using a fixed stencil to interpolate data and numerical integration using [Gaussian quadrature](https://faculty.washington.edu/finlayso/ebook/quadrature/methods/Gauss.htm), both of which can be implemented using nested for loops in element-wise implementations. In array programming languages, these two computational patterns transform to a convolution operation and a multi-axis unary reduction operation respectively. These two patterns make the array programming implementation far simpler since they obviate the need for manually loop through elements of . The key is to know that these patterns exist for widely used computational patterns. -->
 
-We first choose the region of interest that the interpolated quantity depends on by using indexing operations, as done in `state[variable, 2 : nz + 2, :]`. Since the maximum dimension of the array that convolution operation supports is 2D, we loop through all the conservative variables (represented by `variable`) and convolve them with the interpolating stencil/kernel to compute the interpolated quantity, which is the flux of the conserved variable. The `mode` option controls the size of the output. Make sure you understand that the flux is stored on the cell edges and that the dimension of the array would be `(nz + 1, nx + 1)`, while the conservative variables are stored on the cell centers that include the points in the interior and exterior and would be of dimension `(nz + 4, nx + 4)` per conservative variable. Knowing the dimensions of these arrays is imporant since the output of the array will depend on the `mode` of the convolution. Refer to this [tutorial](https://towardsdatascience.com/the-most-intuitive-and-easiest-guide-for-convolutional-neural-network-3607be47480) to learn more about different convolution modes.
+We first choose the region of interest that the interpolated quantity depends on by using indexing operations, as done in `state[variable, 2 : nz + 2, :]`. Since the maximum dimension of the array that convolution operation supports is 2D, we loop through all the conservative variables (represented by `variable`) and convolve them with the interpolating stencil/kernel to compute the interpolated quantity, which is the flux of the conserved variable. The `mode` option in convolution controls the size of the output. Make sure you understand that the flux is stored on the cell edges and that the dimension of the array would be `(nz + 1, nx + 1)`, while the conservative variables are stored on the cell centers that include the points in the interior and exterior and is of dimension `(nz + 4, nx + 4)` per conservative variable. The four points result from accounting for the two ghost points on either side of the domain. Knowing the dimensions of these arrays is imporant since the output of the array will depend on the `mode` of the convolution and the dimension of the inpur array. Refer to this [tutorial](https://towardsdatascience.com/the-most-intuitive-and-easiest-guide-for-convolutional-neural-network-3607be47480) to learn more about different convolution modes.
 
 To compute the flux in `z`, we choose the corresponding data in `state[variable, :, 2 : nx + 2]` and follow the exact same procedure as described above except that the shape of the kernel will change. Since we are interpolating in `z`, we have a non-unit stride in the computation, and the kernel should reflect that. This is done by changing the shape of the kernel such that the coefficients align with the `z` dimension of the array.
 
@@ -123,18 +123,13 @@ for ivar in range(fields.nvariables):
 ```
 
 #### Learning how to implement numerical integration using NumPy
-
-(Initialization and Quadrature Computation)
-
-(talk about all possible options)
-
 PyMiniWeather supports evolution of the following flow configurations 
 
 1. Rising thermal bubble (simulates hot bubble rising up)
 2. Falling thermal bubble (simulates cold bubble falling down)
 3. Colliding thermal bubbles (collision of hot and cold bubble)
 
-The hot and cold thermal bubbles are created by making sure the background potential temperature is either smaller or larger than that of the potential temperature profile inside the bubble, which follows a squared cosine profile. The bubble is then evolved in time. A Gauss-Legendre quadrature is employed for the initialization of the hydrostatic states as described in section 3.4.1 in this [article](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3989). We focus on the array-based implementation of the quadrature computation. A simple element-wise implementation ([credits](https://github.com/mrnorman/miniWeather)) of numerical integration is given below, where a two dimension matrix of quadrature points is created for each cell and reduced along the two dimensions before writing into the respective conservative variable (see [original code](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_serial.cpp#L536)).
+The hot and cold thermal bubbles are created by making sure the background potential temperature is either smaller or larger than that of the potential temperature profile inside the bubble, which follows a squared cosine profile. The bubble is then evolved in time. A Gauss-Legendre quadrature is employed for the initialization of the hydrostatic states as described in section 3.4.1 in this [article](https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.3989). We focus on the array-based implementation of the quadrature computation. A simple element-wise implementation ([credits](https://github.com/mrnorman/miniWeather)) of numerical integration is given below, where a two dimensional matrix of quadrature points is created for each cell and reduced along the two dimensions before writing into the respective conservative variable (see [original code](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_serial.cpp#L536)).
 ```
 for (k=0; k<nz+2*hs; k++) {
   for (i=0; i<nx+2*hs; i++) {
@@ -160,6 +155,10 @@ for (k=0; k<nz+2*hs; k++) {
   }   
 }
 ```
+
+The numerical integration computation for a cell can be thought of as an elementwise dot product of two matrices with the matrices representing the GLL quadrature points inside the cell and the quadrature weights respectively. Note that the quadrature points are constructed by a linear transformation from the cell centroid and that these quadrature points are not required after this computation. In the above code snippet, these points are constructed on the fly and thus do not require any extra memory allocation. However, in the `NumPy` version of this computation, we can construct the GLL coordinates for the entire grid. Since there are 3 GLL points per dimension, and we simulate two-dimensional flows, we have 3x3 times the size of the regular mesh. This requires almost a 10X higher memory footprint to persist the mesh in memory.
+
+[March 7, 7PM]
 
 This translates to the following three operations in the array-based paradigm: create two new dimensions to the coordinate array and form the quadrature points, do element-wise matrix multiply with quadrature weights and the conservative variables computed at the quadrature points, and then reduce along the newly created axes to complete the numerical integration. This is shown in the code snippet below:
 
