@@ -1,4 +1,7 @@
 import os
+import logging
+
+logger = logging.getLogger("pyminiweather.log")
 
 if "LEGATE_MAX_DIM" in os.environ and "LEGATE_MAX_FIELDS" in os.environ:
     from legate.timing import time
@@ -30,4 +33,4 @@ class TimedCodeBlock(object):
 
     def __exit__(self, type, value, traceback):
         self.elapsed_time = (time() - self.elapsed_time) / 1e6
-        print(f"{self.label}: {self.elapsed_time} s", flush=True)
+        logger.info(f"{self.label}: {self.elapsed_time} s")
