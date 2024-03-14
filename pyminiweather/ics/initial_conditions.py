@@ -66,7 +66,7 @@ class InitBase(ABC):
 
         Returns:
         -------
-            Output background hydrostatic density and potential temperature
+        Output background hydrostatic density and potential temperature
 
         """
         ht = Constants.theta0.value * np.exp(
@@ -114,8 +114,8 @@ class CollisionInterior(InitBase):
 
         Returns:
         --------
-            Density, u velocity, w velocity, temperature, potential
-            density and potential temperature
+        Density, u velocity, w velocity, temperature, potential
+        density and potential temperature
         """
 
         assert x.ndim == z.ndim == 4
