@@ -176,7 +176,7 @@ def get_params_from_args(args):
 def main():
     parser = get_parser()
     args, _ = parser.parse_known_args()
-    params = vars(args).copy()
+    params = get_params_from_args(args)
 
     logger = get_logger(args.app_log_file)
 
