@@ -154,8 +154,8 @@ def get_parser():
 
 def main():
     parser = get_parser()
-    args, unknown_args = parser.parse_known_args()
-    params = vars(args)
+    args, _ = parser.parse_known_args()
+    params = vars(args).copy()
 
     logger = get_logger(args.log_file)
 
