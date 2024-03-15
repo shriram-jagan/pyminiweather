@@ -13,7 +13,6 @@ from pyminiweather.utils import TimedCodeBlock
 
 
 def get_logger(filename: str = None):
-
     logger = logging.getLogger("pyminiweather")
     handler = (
         logging.StreamHandler()
@@ -133,15 +132,15 @@ def get_parser():
         "output-freq steps but disabled by default (default: -1)",
     )
     parser.add_argument(
-        "--filename",
+        "--app-filename",
         type=str,
         default="PyMiniWeatherData.txt",
-        dest="filename",
+        dest="app_filename",
         help="Name of the output file the solution variables"
         " will be written to. (default: PyMiniWeatherData.txt)",
     )
     parser.add_argument(
-        "--log-file",
+        "--app-log-file",
         action="store",
         type=Path,
         default=None,
@@ -152,12 +151,34 @@ def get_parser():
     return parser
 
 
+def get_params_from_args(args):
+    params = {}
+
+    params["nx"] = args.nx
+    params["nz"] = args.nz
+    params["xlen"] = args.xlen
+    params["zlen"] = args.zlen
+    params["nsteps"] = args.nsteps
+    params["nwarmups"] = args.nwarmups
+    params["ic_type"] = args.ic_type
+    params["hs"] = args.hs
+    params["s"] = args.s
+    params["max_speed"] = args.max_speed
+    params["cfl"] = args.cfl
+    params["output_freq"] = args.output_freq
+    params["app_filename"] = args.app_filename
+    params["app_log_file"] = args.app_log_file
+    params["verbose"] = args.verbose
+
+    return params
+
+
 def main():
     parser = get_parser()
     args, unknown_args = parser.parse_known_args()
     params = vars(args)
 
-    logger = get_logger(args.log_file)
+    logger = get_logger(args.app_log_file)
 
     params["dx"] = params["xlen"] / params["nx"]
     params["dz"] = params["zlen"] / params["nz"]
@@ -189,8 +210,8 @@ def main():
             # I/O and print stats
             if params["output_freq"] > 0 and (istep + 1) % params["output_freq"] == 0:
                 logger.info(f"Step: {istep}, max(rho*t): {fields.state[3].max()}")
-                fname, append = params["filename"].split(".")
-                Writer.write_state(params["filename"], fields)
+                fname, append = params["app_filename"].split(".")
+                Writer.write_state(params["app_filename"], fields)
                 Writer.write_array(
                     fname + "_svars." + append,
                     compute_solution_variables(params, fields),
