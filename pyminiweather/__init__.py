@@ -7,7 +7,7 @@ if "LEGATE_MAX_DIM" in os.environ and "LEGATE_MAX_FIELDS" in os.environ:
     from cunumeric import convolve as convolve
 else:
     import numpy as numpy
-    from scipy.signal import convolve2d as convolve
+    from scipy.signal import convolve as convolve
 
 print(f"Imported numpy backend: {numpy.__name__}")
 
