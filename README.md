@@ -83,43 +83,40 @@ However, it is important to note that the moving window operation that is perfor
 
 Convolution operations usually support three different modes of operation (full, valid and same) depending on the extent to which the interpolating kernel is allowed to convolve with the base array, which affects the size of the output. Since cuNumeric supports the "same" mode for convolution, we choose the "same" mode in this implementation. Since we convolve the conserved variables with an interpolating stencil to determine the flux at the cell edges, we can compute the shape of the flux array and slice the output array accordingly. See the code snippet below on how it is implemented:
 ```
-for variable in range(fields.nvariables):
-  fields.vals_x[variable, ...] = convolve(
-      state[variable, 2 : nz + 2, :],
-      fields.fourth_order_kernel[np.newaxis, :],
-      mode="same",
-  )[:, 2:-1]
+fields.vals_x[...] = convolve(
+    state[:, 2 : nz + 2, :],
+    fields.fourth_order_kernel[np.newaxis, np.newaxis, :],
+    mode="same",
+)[:, :, 2:-1]
 
-  fields.d3_vals_x[variable, ...] = convolve(
-      state[variable, 2 : nz + 2, :],
-      fields.first_order_kernel[np.newaxis, :],
-      mode="same",
-  )[:, 2:-1]
-
+fields.d3_vals_x[...] = convolve(
+    state[:, 2 : nz + 2, :],
+    fields.first_order_kernel[np.newaxis, np.newaxis, :],
+    mode="same",
+)[:, :, 2:-1]
 ```
-Note that for the NumPy backend, we use the `convolve2D` API from SciPy since NumPy does not support convolution of two-dimensional arrays. cuNumeric, on the other hand, does support convolution of two-dimensional arrays. Both the backends require the `kernel` to be of the same dimension as the array, so the one-dimensional kernel is extended to two-dimensions. Note that the shape of the two-dimensional `kernel` will be different for both x- and z- directions since there will be a non-unit stride in the z-direction. 
+Note that for the NumPy backend, we use the `convolve` API from SciPy since NumPy does not support convolution of two-dimensional arrays. cuNumeric, on the other hand, does support convolution of two-dimensional arrays. Both the backends require the `kernel` to be of the same dimension as the array, so the one-dimensional kernel is extended to two-dimensions. Note that the shape of the two-dimensional `kernel` will be different for both x- and z- directions since there will be a non-unit stride in the z-direction. 
 
 <!-- [THIS PARAGRAPH NEEDS A REWRITE]
 
 Array programming patterns for simple element-wise operations that are trivial in C are different in array programming languages like Python. There are two such patterns in PyMiniWeather - a moving window operation using a fixed stencil to interpolate data and numerical integration using [Gaussian quadrature](https://faculty.washington.edu/finlayso/ebook/quadrature/methods/Gauss.htm), both of which can be implemented using nested for loops in element-wise implementations. In array programming languages, these two computational patterns transform to a convolution operation and a multi-axis unary reduction operation respectively. These two patterns make the array programming implementation far simpler since they obviate the need for manually loop through elements of . The key is to know that these patterns exist for widely used computational patterns. -->
 
-We first choose the region of interest that the interpolated quantity depends on by using indexing operations, as done in `state[variable, 2 : nz + 2, :]`. Since the maximum dimension of the array that convolution operation supports is 2D, we loop through all the conservative variables (represented by `variable`) and convolve them with the interpolating stencil/kernel to compute the interpolated quantity, which is the flux of the conserved variable. The `mode` option in convolution controls the size of the output. Make sure you understand that the flux is stored on the cell edges and that the dimension of the array would be `(nz + 1, nx + 1)`, while the conservative variables are stored on the cell centers that include the points in the interior and exterior and is of dimension `(nz + 4, nx + 4)` per conservative variable. The four points result from accounting for the two ghost points on either side of the domain. Knowing the dimensions of these arrays is imporant since the output of the array will depend on the `mode` of the convolution and the dimension of the inpur array. Refer to this [tutorial](https://towardsdatascience.com/the-most-intuitive-and-easiest-guide-for-convolutional-neural-network-3607be47480) to learn more about different convolution modes.
+We convolve the conservarive variables with the interpolating stencil/kernel to compute the interpolated quantity, which is the flux of the conserved variable. The `mode` option in convolution controls the size of the output. Make sure you understand that the flux is stored on the cell edges and that the dimension of the array would be `(nz + 1, nx + 1)`, while the conservative variables are stored on the cell centers that include the points in the interior and exterior and is of dimension `(nz + 4, nx + 4)` per conservative variable. The four points result from accounting for the two ghost points on either side of the domain. Knowing the dimensions of these arrays is imporant since the output of the array will depend on the `mode` of the convolution and the dimension of the inpur array. Refer to this [tutorial](https://towardsdatascience.com/the-most-intuitive-and-easiest-guide-for-convolutional-neural-network-3607be47480) to learn more about different convolution modes.
 
-To compute the flux in `z`, we choose the corresponding data in `state[variable, :, 2 : nx + 2]` and follow the exact same procedure as described above except that the shape of the kernel will change. Since we are interpolating in `z`, we have a non-unit stride in the computation, and the kernel should reflect that. This is done by changing the shape of the kernel such that the coefficients align with the `z` dimension of the array.
+To compute the flux in `z`, we follow the exact same procedure as described above except that the shape of the kernel will change. Since we are interpolating in `z`, we have a non-unit stride in the computation, and the kernel should reflect that. This is done by changing the shape of the kernel such that the coefficients align with the `z` dimension of the array.
 
 ```
-for ivar in range(fields.nvariables):
-    fields.vals_z[ivar, ...] = convolve(
-        state[ivar, :, 2 : nx + 2], 
-        fields.fourth_order_kernel[:, np.newaxis],
-        mode="same",
-    )[2:-1, :]
+fields.vals_z[:] = convolve(
+    state[:, :, 2 : nx + 2],
+    fields.fourth_order_kernel[np.newaxis, :, np.newaxis],
+    mode="same",
+)[:, 2:-1, :]
 
-    fields.d3_vals_z[ivar, ...] = convolve(
-        state[ivar, :, 2 : nx + 2], 
-        fields.first_order_kernel[:, np.newaxis],
-        mode="same",
-    )[2:-1, :]
+fields.d3_vals_z[:] = convolve(
+    state[:, :, 2 : nx + 2],
+    fields.first_order_kernel[np.newaxis, :, np.newaxis],
+    mode="same",
+)[:, 2:-1, :]
 ```
 
 #### Learning how to implement numerical integration using NumPy

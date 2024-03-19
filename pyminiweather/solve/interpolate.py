@@ -30,18 +30,17 @@ def interpolate_x(params: Dict, fields: Fields, state: np.ndarray = None):
 
     state = fields.state if state is None else state
 
-    for variable in range(fields.nvariables):
-        fields.vals_x[variable, ...] = convolve(
-            state[variable, 2 : nz + 2, :],
-            fields.fourth_order_kernel[np.newaxis, :],
-            mode="same",
-        )[:, 2:-1]
+    fields.vals_x[...] = convolve(
+        state[:, 2 : nz + 2, :],
+        fields.fourth_order_kernel[np.newaxis, np.newaxis, :],
+        mode="same",
+    )[:, :, 2:-1]
 
-        fields.d3_vals_x[variable, ...] = convolve(
-            state[variable, 2 : nz + 2, :],
-            fields.first_order_kernel[np.newaxis, :],
-            mode="same",
-        )[:, 2:-1]
+    fields.d3_vals_x[...] = convolve(
+        state[:, 2 : nz + 2, :],
+        fields.first_order_kernel[np.newaxis, np.newaxis, :],
+        mode="same",
+    )[:, :, 2:-1]
 
 
 def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
@@ -67,18 +66,17 @@ def interpolate_z(params: Dict, fields: Fields, state: np.ndarray = None):
 
     state = fields.state if state is None else state
 
-    for variable in range(fields.nvariables):
-        fields.vals_z[variable, ...] = convolve(
-            state[variable, :, 2 : nx + 2],
-            fields.fourth_order_kernel[:, np.newaxis],
-            mode="same",
-        )[2:-1, :]
+    fields.vals_z[:] = convolve(
+        state[:, :, 2 : nx + 2],
+        fields.fourth_order_kernel[np.newaxis, :, np.newaxis],
+        mode="same",
+    )[:, 2:-1, :]
 
-        fields.d3_vals_z[variable, ...] = convolve(
-            state[variable, :, 2 : nx + 2],
-            fields.first_order_kernel[:, np.newaxis],
-            mode="same",
-        )[2:-1, :]
+    fields.d3_vals_z[:] = convolve(
+        state[:, :, 2 : nx + 2],
+        fields.first_order_kernel[np.newaxis, :, np.newaxis],
+        mode="same",
+    )[:, 2:-1, :]
 
 
 def compute_flux_x(params: Dict, fields: Fields):
