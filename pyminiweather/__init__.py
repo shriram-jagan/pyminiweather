@@ -1,6 +1,5 @@
 import os
 from enum import IntEnum
-from typing import Tuple
 
 if "LEGATE_MAX_DIM" in os.environ and "LEGATE_MAX_FIELDS" in os.environ:
     import cunumeric as numpy
