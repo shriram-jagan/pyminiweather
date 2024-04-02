@@ -234,7 +234,7 @@ PyMiniWeather can be run using `numpy` or `cunumeric` as follows:
 ```
 cd work
 mkdir -p post/images
-${CONDA_PREFIX}/bin/pyminiweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-freq 1000  --ic-type "thermal"
+${CONDA_PREFIX}/bin/PyMiniweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-freq 1000  --ic-type "thermal"
 <path-to-pyminiweather>/tools/make_images.py --nx 2500 --nz 1250 --ntimesteps 3 --directory ./post 
 ```
 
@@ -242,7 +242,7 @@ Run using the following command to use cuNumeric:
 ```
 cd work
 mkdir -p post/images
-LEGATE_TEST=1 legate --cpus 1 --sysmem 20000 --eager-alloc-percentage 10 ${CONDA_PREFIX}/bin/pyminiweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-freq 1000 --ic-type "thermal"
+LEGATE_TEST=1 legate --cpus 1 --sysmem 20000 --eager-alloc-percentage 10 ${CONDA_PREFIX}/bin/PyMiniweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-freq 1000 --ic-type "thermal"
 <path-to-pyminiweather>/tools/make_images.py --nx 2500 --nz 1250 --ntimesteps 3 --directory ./post 
 ```
 
@@ -257,7 +257,7 @@ The user can request data to be written to a file at periodic intervals by passi
 
 Currently, PyMiniWeather dumps 2D slices of 3D and 4D arrays and reshapes them back to their original shape based on the inputs passed to the script `make_images.py`. The above script should dump contour plots of potential temperature (variable index: 3) in the `post/images` directory. Note that the `ntimesteps` in `make_images.py` refers to the number of timesteps that the data file contains which in the above example is not `3000` but `3` since the output was written every `1000` timesteps.
 
-Use `${CONDA_PREFIX}/bin/pyminiweather.py --help` to get more information on initial conditions that are supported by the solver.
+Use `${CONDA_PREFIX}/bin/PyMiniweather.py --help` to get more information on initial conditions that are supported by the solver.
 
 ## How to Write a PDE solver
 ### Governing equations and discretization

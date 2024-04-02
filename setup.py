@@ -33,7 +33,7 @@ setup(
     author_email="sjagannathan@nvidia.com",
     packages=['pyminiweather'],
     package_dir={'pyminiweather': 'pyminiweather'},
-    entry_points={'console_scripts': ['pyminiweather.py = pyminiweather.__main__:main']},
+    entry_points={'console_scripts': ['PyMiniweather.py = pyminiweather.__main__:main']},
     include_package_data=True,
     python_requires=">=3.0",
     # install_requires=requirements,
