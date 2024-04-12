@@ -7,10 +7,10 @@ This work is a pedagogical exercise meant to teach users how to approach problem
 We focus on the serial implementation of the [MiniWeather](https://github.com/mrnorman/miniWeather) app using two backends that support array-based programming: NumPy/SciPy and [cuNumeric](https://github.com/nv-legate/cunumeric). While NumPy only allows single threaded execution of the program, cuNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing.
 
 ## Learning Objectives
--  Learn the difference between the array-based implementation and element wise implementation of the solver
-   - How to transform nested for loops into array-based codes
-   - How to handle temporary variables found in element-wise codes
--  Learn how to develop a simple PDE solver using cuNumeric
+-  Learn the difference between the array-based implementation and element wise implementation of a PDE solver
+   - Learn how to transform nested for loops into array-based codes
+   - Learn how to handle temporary variables found in element-wise codes
+-  Learn how to develop a simple PDE solver using NumPy and/or cuNumeric
 
 ### Pre-requisites
 - The reader is expected to have a good understanding of the governing equations and the spatial and temporal discretization of the PDE. [Physics, PDEs, and Numerical Approximations](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#physics-pdes-and-numerical-approximations) is a good starting point. Make sure you understand the reduced form of the discretized equations described in [Finite volume spatial discretization](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#finite-volume-spatial-discretization) and the sub-steps needed for the third-order Runge-Kutta timestepping scheme described in [Runge-Kutta Time Integration](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#runge-kutta-time-integration)
@@ -19,9 +19,9 @@ We focus on the serial implementation of the [MiniWeather](https://github.com/mr
 
 - Know how to use classes in Python
 
-- While not exactly a pre-requisite, a basic understanding of convolution operation will be helpful in understanding some parts of the code
+- While not exactly a pre-requisite, a basic understanding of convolution operation will be helpful in understanding some parts of the code. Use [Convolution Visualizer](https://ezyang.github.io/convolution-visualizer/) or watch a [YouTube Video](https://www.youtube.com/watch?v=KuXjwB4LzSA) to get a basic understanding.
 
-- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cunumeric?tab=readme-ov-file#installation). Create an issue if you are having trouble installing. Use `NumPy` to get started.
+- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cunumeric?tab=readme-ov-file#installation). Create an issue if you are having trouble installing. Use NumPy to get started.
 
 ## Key Concepts
 - Learn how linear interpolation using custom weights can be implemented using NumPy
@@ -30,6 +30,8 @@ We focus on the serial implementation of the [MiniWeather](https://github.com/mr
 - Be amazed when you realize that PyMiniWeather avoids all halo-exchanges that are commonly found in data-parallel codes implemented using MPI. For example, see the [halo exchange](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_mpi.cpp#L399) in Matt's implementation. You won't see that or any other exchanges in this implementation. Take a minute and understand what that means. You just write serial code. That's it.
 
 ## Background
+
+From this section, we assume that the reader is familiar with the content in Matt's original blog that has more background information on MiniWeather. The reader is also expected to have taken a look at the C or C++ implementation of a serial or parallel version of Matt's implementation. 
 
 ### Numerical Method
 
@@ -153,8 +155,6 @@ for (k=0; k<nz+2*hs; k++) {
 
 The numerical integration computation for a cell can be thought of as an elementwise dot product of two matrices with the matrices representing the GLL quadrature points inside the cell and the quadrature weights respectively. Note that the quadrature points are constructed by a linear transformation from the cell centroid and that these quadrature points are not required after this computation. In the above code snippet, these points are constructed on the fly and thus do not require any extra memory allocation. However, in the `NumPy` version of this computation, we can construct the GLL coordinates for the entire grid. Since there are 3 GLL points per dimension, and we simulate two-dimensional flows, we have 3x3 times the size of the regular mesh. This requires almost a 10X higher memory footprint to persist the mesh in memory.
 
-[March 7, 7PM]
-
 This translates to the following three operations in the array-based paradigm: create two new dimensions to the coordinate array and form the quadrature points, do element-wise matrix multiply with quadrature weights and the conservative variables computed at the quadrature points, and then reduce along the newly created axes to complete the numerical integration. This is shown in the code snippet below:
 
 ```
@@ -249,9 +249,7 @@ LEGATE_TEST=1 legate --cpus 1 --sysmem 20000 --eager-alloc-percentage 10 ${CONDA
 To use multiple OpenMP threads, CPUs, or GPUs, pass the corresponding flags to `legate`: `--ompthreads <nompthreads>`, `--ncpus <ncpus>`, or `--ngpus <ngpus>`. If your system has multiple sockets, consider using `omps <nomps>` to specify the number of sockets. For more information, use `legate --help`.
 
 
-### I/O
-
-WORK IN PROGRESS. THIS IS LIKELY TO CHANGE.
+### I/O [WORK IN PROGRESS]
 
 The user can request data to be written to a file at periodic intervals by passing a integer number of timesteps to `output-freq`. As long as this number is greater than zero and less than the total number of timesteps, the conserved variables and derived quantities will be written to two different files. The data gets appened to the same set of files after the first time step, so if there is an existing file that is named either `PyMiniWeatherData.txt` or `PyMiniWeatherData_svars.txt`, you will have to remove them before a new simulation. Once the data is written to these files, they can be post-processed using the `make_images.py` script in the `tools` directory.
 
