@@ -67,6 +67,13 @@ def get_parser():
         help="Number of time steps (default: 10)",
     )
     parser.add_argument(
+        "--dt",
+        type=float,
+        default=None,
+        dest="dt",
+        help="Time step size (if none, calculated using CFL)",
+    )
+    parser.add_argument(
         "--nwarmups",
         type=int,
         default=0,
@@ -157,6 +164,7 @@ def get_params_from_args(args):
     params["nz"] = args.nz
     params["xlen"] = args.xlen
     params["zlen"] = args.zlen
+    params["dt"] = args.dt
     params["nsteps"] = args.nsteps
     params["nwarmups"] = args.nwarmups
     params["ic_type"] = args.ic_type
@@ -181,9 +189,10 @@ def main():
 
     params["dx"] = params["xlen"] / params["nx"]
     params["dz"] = params["zlen"] / params["nz"]
-    params["dt"] = (
-        np.minimum(params["dx"], params["dz"]) * params["cfl"] / params["max_speed"]
-    )
+    if params["dt"] is None:
+        params["dt"] = (
+            np.minimum(params["dx"], params["dz"]) * params["cfl"] / params["max_speed"]
+        )
     if params["verbose"]:
         for k, v in params.items():
             logger.info(f"{k:25s} {v}")
