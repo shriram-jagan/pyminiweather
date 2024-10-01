@@ -1,0 +1,11 @@
+1. Execute benchmark_sim.sh and look for the elapsed time for different 
+   backends, and compute the time per step, and make sure the problem
+   sizes are appropriate.
+
+2. Execute run_sim.sh to kick off a long running job that dumps
+   out the post-processing quantities
+
+3. Executre make_plots.sh to create png
+
+4. Execute make_gifs.py to create the stacked gif in the images_stacked
+   directory 
