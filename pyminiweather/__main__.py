@@ -5,7 +5,6 @@ from pathlib import Path
 from pyminiweather import numpy as np
 from pyminiweather.data import Fields, initialize_fields
 from pyminiweather.ics import init
-from pyminiweather.io import Writer
 from pyminiweather.mesh import MeshData
 from pyminiweather.post import compute_solution_variables, compute_stats
 from pyminiweather.solve import evolve
@@ -205,17 +204,25 @@ def main():
             for _ in range(params["nwarmups"]):
                 evolve(params, fields, mesh, dt=params["dt"])
 
+    file_touched = False
     with TimedCodeBlock(label="Elapsed time for timestepping"):
         for istep in range(params["nsteps"]):
             # I/O and print stats
             if params["output_freq"] > 0 and (istep + 1) % params["output_freq"] == 0:
                 logger.info(f"Step: {istep}, max(rho*t): {fields.state[3].max()}")
                 fname, append = params["app_filename"].split(".")
-                Writer.write_state(params["app_filename"], fields)
-                Writer.write_array(
-                    fname + "_svars." + append,
-                    compute_solution_variables(params, fields),
-                )
+
+                permissions = "a" if file_touched else "w"
+                with open(params["app_filename"], permissions) as outfile:
+                    last_dim = fields.state.shape[-1]
+                    np.savetxt(outfile, fields.state.reshape(-1, last_dim), delimiter=",")
+                with open(fname + "_svars." + append, permissions) as outfile:
+                    data = compute_solution_variables(params, fields)
+                    last_dim = data.shape[-1]
+                    np.savetxt(outfile, data.reshape(-1, last_dim), delimiter=",")
+
+                file_touched = True
+
 
             # step through in time
             evolve(params, fields, mesh, dt=params["dt"])
