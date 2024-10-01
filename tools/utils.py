@@ -14,6 +14,7 @@ class Params:
     plot_nlevels: int
     plot_nticks: int
     plot_no_colorbar: bool
+    plot_vmin_vmax: bool
     filename: str
 
 
