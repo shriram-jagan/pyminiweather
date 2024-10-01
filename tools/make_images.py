@@ -102,6 +102,14 @@ def get_parser():
         "contour plots (default: False)",
     )
     parser.add_argument(
+        "--plot-vmin-vmax",
+        type=float,
+        nargs=2,
+        default=None,
+        dest="plot_vmin_vmax",
+        help="Provide the vmin and vmax for the plot",
+    )
+    parser.add_argument(
         "--filename",
         type=str,
         default="PyMiniWeatherData.txt",
@@ -138,7 +146,7 @@ image_directory = Path(params.directory) / "images"
 if not image_directory.exists():
     warnings.warn(
         f"Make sure the images sub-directory inside"
-        " {params.directory} exists AND writeable"
+        f" {params.directory} exists AND writeable"
     )
 
     sys.exit()
@@ -148,7 +156,7 @@ assert params.variable_index < params.nvariables
 
 # Read the data file
 base_filename = params.filename.split(".")[0]
-py = np.loadtxt(params.directory + f"{base_filename}_svars.txt", delimiter=",").reshape(
+py = np.loadtxt(Path(params.directory) / f"{base_filename}_svars.txt", delimiter=",").reshape(
     params.ntimesteps, params.nvariables, params.nz, params.nx
 )
 
@@ -159,8 +167,14 @@ mesh_x, mesh_y = mesh.get_mesh_cell_centers()
 padding = 0.10
 round_to_decimals = 2
 
-vmin = py[0 : params.ntimesteps, params.variable_index].min()
-vmax = py[0 : params.ntimesteps, params.variable_index].max()
+if args.plot_vmin_vmax is None:
+    vmin = py[0 : params.ntimesteps, params.variable_index].min()
+    vmax = py[0 : params.ntimesteps, params.variable_index].max()
+else:
+    vmin, vmax = args.plot_vmin_vmax
+
+print(f"Contour vmin/vmax: {vmin}, {vmax}")
+
 levels = np.linspace(vmin, vmax, params.plot_nlevels)
 ticks = np.linspace(vmin, vmax, params.plot_nticks).round(round_to_decimals)
 
@@ -194,6 +208,8 @@ for timestep in range(step_start, step_end, step_skip):
     ax.set_xticklabels([])
     ax.set_yticks([])
     ax.set_yticklabels([])
+
+    plt.tight_layout()
 
     fname = f"{image_directory}/{timestep:0>3}.png"
     plt.savefig(fname)
