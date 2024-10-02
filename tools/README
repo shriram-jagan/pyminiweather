@@ -9,3 +9,12 @@
 
 4. Execute make_gifs.py to create the stacked gif in the images_stacked
    directory 
+
+
+Note that the following packages will be required:
+ - matplotlib
+ - imageio
+
+These packages can be installed using:
+
+`conda install -c conda-forge matplotlib imageio`
