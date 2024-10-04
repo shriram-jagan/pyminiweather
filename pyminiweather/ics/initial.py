@@ -3,7 +3,7 @@ from typing import Dict
 
 from pyminiweather import numpy as np
 from pyminiweather.data import Constants, Fields, Quadrature, initialize_fields
-from pyminiweather.mesh import MeshData, meshgrid
+from pyminiweather.mesh import MeshData 
 
 from .initial_conditions import CCQInitFactory, VCEQInitFactory
 
@@ -52,7 +52,7 @@ def init(fields: Fields, params: Dict, Mesh: MeshData):
     ## Do the whole domain
     # x = np.linspace(-hs * dx, (nx + hs) * dx, nx + 2 * hs, endpoint=False)
     # z = np.linspace(-hs * dz, (nz + hs) * dz, nz + 2 * hs, endpoint=False)
-    # x, z = meshgrid(x, z)
+    # x, z = np.meshgrid(x, z)
 
     x, z = Mesh.get_mesh_int_ext()
 

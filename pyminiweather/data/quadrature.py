@@ -1,4 +1,3 @@
-from pyminiweather.mesh import meshgrid
 from pyminiweather import numpy as np
 
 
@@ -32,10 +31,10 @@ class GaussianQuadrature:
 
         self.__qweights_outer: np.ndarray = np.outer(self.__qweights, self.__qweights)
 
-        self.__qpoints_grid_x, self.__qpoints_grid_z = meshgrid(
+        self.__qpoints_grid_x, self.__qpoints_grid_z = np.meshgrid(
             self.__qpoints, self.__qpoints
         )
-        self.__qweights_grid_x, self.__qweights_grid_z = meshgrid(
+        self.__qweights_grid_x, self.__qweights_grid_z = np.meshgrid(
             self.__qweights, self.__qweights
         )
 
