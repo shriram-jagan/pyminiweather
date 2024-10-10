@@ -52,7 +52,7 @@ def init(fields: Fields, params: Dict, Mesh: MeshData):
     ## Do the whole domain
     # x = np.linspace(-hs * dx, (nx + hs) * dx, nx + 2 * hs, endpoint=False)
     # z = np.linspace(-hs * dz, (nz + hs) * dz, nz + 2 * hs, endpoint=False)
-    # x, z = meshgrid(x, z)
+    # x, z = np.meshgrid(x, z)
 
     x, z = Mesh.get_mesh_int_ext()
 
