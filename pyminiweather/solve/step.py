@@ -15,7 +15,9 @@ from .interpolate import (
 )
 from .source import add_source_terms
 
-reverse_direction: bool = False
+reverse_direction: bool = False 
+
+step_number: int = 0
 
 
 def discrete_step(
@@ -60,25 +62,57 @@ def discrete_step(
         Direction for this substep
     """
 
+    global step_number
+
     nz = params["nz"]
     nx = params["nx"]
 
     ic_type = params["ic_type"]
     if direction == Directions.X:
         set_bc_x(params, fields, state_forcing, ic_type)
+
+        last_dim = state_forcing.shape[-1]
+        np.savetxt(f"{step_number:02d}.x.state_forcing.txt", state_forcing.reshape(-1, last_dim))
+
         interpolate_x(params, fields, state_forcing)
         compute_flux_x(params, fields)
         compute_tend_x(params, fields, state_forcing)
+
+        last_dim = fields.vals_x.shape[-1]
+        np.savetxt(f"{step_number:02d}.x.vals.txt", fields.vals_x.reshape(-1, last_dim))
+
+        last_dim = fields.flux.shape[-1]
+        np.savetxt(f"{step_number:02d}.x.flux.txt", fields.flux.reshape(-1, last_dim))
+
+        last_dim = fields.tend.shape[-1]
+        np.savetxt(f"{step_number:02d}.x.tend.txt", fields.tend.reshape(-1, last_dim))
     if direction == Directions.Z:
         set_bc_z(params, fields, state_forcing, ic_type)
+
+        last_dim = state_forcing.shape[-1]
+        np.savetxt(f"{step_number:02d}.z.state_forcing.txt", state_forcing.reshape(-1, last_dim))
+
         interpolate_z(params, fields, state_forcing)
         compute_flux_z(params, fields)
         compute_tend_z(params, fields, state_forcing)
 
+        last_dim = fields.vals_z.shape[-1]
+        np.savetxt(f"{step_number:02d}.z.vals.txt", fields.vals_z.reshape(-1, last_dim))
+
+        last_dim = fields.flux.shape[-1]
+        np.savetxt(f"{step_number:02d}.z.flux.txt", fields.flux.reshape(-1, last_dim))
+
+        last_dim = fields.tend.shape[-1]
+        np.savetxt(f"{step_number:02d}.z.tend.txt", fields.tend.reshape(-1, last_dim))
+
+
+    # increment step
+    step_number = step_number + 1
+
     add_source_terms(params, mesh, fields)
 
     state_out[:, 2 : nz + 2, 2 : nx + 2] = (
-        state_init[:, 2 : nz + 2, 2 : nx + 2] + dt * fields.tend[:]
+            state_init[:, 2 : nz + 2, 2 : nx + 2] + dt * fields.tend[:]
     )
 
 
