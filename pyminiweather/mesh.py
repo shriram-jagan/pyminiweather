@@ -2,33 +2,6 @@ from typing import Dict, Tuple
 
 from pyminiweather import numpy as np
 
-
-def meshgrid(x: np.ndarray, y: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """This is equivalent to numpy's meshgrid for two one-dimensional
-    input arrays without all the bells and whistles.
-
-    Parameters:
-    ----------
-    x: np.ndarray
-        1D array denoting x-coordinates
-    y: np.ndarray
-        1D array denoting y-coordinates
-
-    Returns:
-    -------
-    A tuple of two-dimensional arrays that correspond to (x, y) pairs
-    in a cartesian coordinate system
-    """
-    if np.__name__ == "numpy":
-        return np.meshgrid(x, y)
-    elif np.__name__ == "cunumeric":
-        assert x.ndim == y.ndim == 1
-
-        return (np.tile(x, (y.size, 1)), np.tile(y, (x.size, 1)).T)
-    else:
-        raise ValueError("Unknown backend")
-
-
 class MeshData:
     def __init__(self, params: Dict):
         self.params = params
@@ -73,7 +46,7 @@ class MeshData:
             self.nz + 2 * self.hs,
             endpoint=False,
         )
-        self.mesh_int_ext = meshgrid(x, z)
+        self.mesh_int_ext = np.meshgrid(x, z)
 
         return self.mesh_int_ext
 
@@ -97,7 +70,7 @@ class MeshData:
             self.dz / 2.0, self.zlen + self.dz / 2.0, self.nz, endpoint=False
         )
 
-        self.mesh_cell_centers = meshgrid(x, z)
+        self.mesh_cell_centers = np.meshgrid(x, z)
 
         return self.mesh_cell_centers
 
