@@ -1,4 +1,4 @@
-import cunumeric as np
+import cupynumeric as np
 import numpy as num
 from pyminiweather.__main__ import get_parser
 from pyminiweather.data import Constants, initialize_fields
