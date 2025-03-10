@@ -2,8 +2,8 @@ import os
 from enum import IntEnum
 
 if "LEGATE_MAX_DIM" in os.environ and "LEGATE_MAX_FIELDS" in os.environ:
-    import cunumeric as numpy
-    from cunumeric import convolve as convolve
+    import cupynumeric as numpy
+    from cupynumeric import convolve as convolve
 else:
     import numpy as numpy
     from scipy.signal import convolve as convolve
