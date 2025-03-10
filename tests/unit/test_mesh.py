@@ -1,4 +1,4 @@
-import cunumeric as np
+import cupynumeric as np
 import numpy as num
 import pytest
 

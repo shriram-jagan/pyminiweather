@@ -25,7 +25,7 @@ setup(
         "version of miniweather by Matt Norman. The miniapp solves "
         "the time-dependent two-dimensional compressible form of "
         "Euler equations on a structured mesh using finite volume "
-        "scheme but using cuNumeric"
+        "scheme but using cuPyNumeric"
     ),
     long_description=readme,
     long_description_content_type="text/markdown",

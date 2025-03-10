@@ -10,7 +10,7 @@ from utils import Params, make_dataclass_from_args
 
 from pyminiweather.mesh import MeshData
 
-plt.set_cmap("Spectral")
+#plt.set_cmap("Spectral")
 
 
 def get_parser():

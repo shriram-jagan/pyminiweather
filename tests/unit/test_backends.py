@@ -1,11 +1,11 @@
 import pytest
 
-import cunumeric as np
+import cupynumeric as np
 import numpy as num
 
 
 def test_backends():
-    """Compare numpy and cunumeric for different backends"""
+    """Compare numpy and cupynumeric for different backends"""
 
     # TODO:
     # create params and change BCs in params and

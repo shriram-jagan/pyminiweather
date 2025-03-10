@@ -4,13 +4,13 @@ PyMiniWeather solves the compressible form of inviscid two-dimensional unsteady 
 
 This work is a pedagogical exercise meant to teach users how to approach problems in scientific computing using array-based paradigms instead of widely used element-wise codes using C, C++ or CUDA. Thus, this repository serves as a tutorial for users writing PDE solvers using NumPy. Array-based programming can be different from element-wise programming, and as will be demonstrated here, some of the computations like interpolation and numerical integration will be different from its element-wise counterpart.
 
-We focus on the serial implementation of the [MiniWeather](https://github.com/mrnorman/miniWeather) app using two backends that support array-based programming: NumPy/SciPy and [cuNumeric](https://github.com/nv-legate/cunumeric). While NumPy only allows single threaded execution of the program, cuNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing.
+We focus on the serial implementation of the [MiniWeather](https://github.com/mrnorman/miniWeather) app using two backends that support array-based programming: NumPy/SciPy and [cuPyNumeric](https://github.com/nv-legate/cupynumeric). While NumPy only allows single threaded execution of the program, cuPyNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing.
 
 ## Learning Objectives
 -  Learn the difference between the array-based implementation and element wise implementation of a PDE solver
    - Learn how to transform nested for loops into array-based codes
    - Learn how to handle temporary variables found in element-wise codes
--  Learn how to develop a simple PDE solver using NumPy and/or cuNumeric
+-  Learn how to develop a simple PDE solver using NumPy and/or cuPyNumeric
 
 ### Pre-requisites
 - The reader is expected to have a good understanding of the governing equations and the spatial and temporal discretization of the PDE. [Physics, PDEs, and Numerical Approximations](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#physics-pdes-and-numerical-approximations) is a good starting point. Make sure you understand the reduced form of the discretized equations described in [Finite volume spatial discretization](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#finite-volume-spatial-discretization) and the sub-steps needed for the third-order Runge-Kutta timestepping scheme described in [Runge-Kutta Time Integration](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#runge-kutta-time-integration)
@@ -21,7 +21,7 @@ We focus on the serial implementation of the [MiniWeather](https://github.com/mr
 
 - While not exactly a pre-requisite, a basic understanding of convolution operation will be helpful in understanding some parts of the code. Use [Convolution Visualizer](https://ezyang.github.io/convolution-visualizer/) or watch a [YouTube Video](https://www.youtube.com/watch?v=KuXjwB4LzSA) to get a basic understanding.
 
-- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cunumeric?tab=readme-ov-file#installation). Create an issue if you are having trouble installing. Use NumPy to get started.
+- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuPyNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cupynumeric?tab=readme-ov-file#installation). Create an issue if you are having trouble installing. Use NumPy to get started.
 
 ## Key Concepts
 - Learn how linear interpolation using custom weights can be implemented using NumPy
@@ -81,7 +81,7 @@ Converting this code snippet to use NumPy or any other array-based library would
 
 However, it is important to note that the moving window operation that is performed here for all points that are relevant for the computation of flux is conceptually equivalent to a convolution operation in NumPy. 
 
-Convolution operations usually support three different modes of operation (full, valid and same) depending on the extent to which the interpolating kernel is allowed to convolve with the base array, which affects the size of the output. Since cuNumeric supports the "same" mode for convolution, we choose the "same" mode in this implementation. Since we convolve the conserved variables with an interpolating stencil to determine the flux at the cell edges, we can compute the shape of the flux array and slice the output array accordingly. See the code snippet below on how it is implemented:
+Convolution operations usually support three different modes of operation (full, valid and same) depending on the extent to which the interpolating kernel is allowed to convolve with the base array, which affects the size of the output. Since cuPyNumeric supports the "same" mode for convolution, we choose the "same" mode in this implementation. Since we convolve the conserved variables with an interpolating stencil to determine the flux at the cell edges, we can compute the shape of the flux array and slice the output array accordingly. See the code snippet below on how it is implemented:
 ```
 fields.vals_x[...] = convolve(
     state[:, 2 : nz + 2, :],
@@ -95,7 +95,7 @@ fields.d3_vals_x[...] = convolve(
     mode="same",
 )[:, :, 2:-1]
 ```
-Note that for the NumPy backend, we use the `convolve` API from SciPy since NumPy does not support convolution of two-dimensional arrays. cuNumeric, on the other hand, does support convolution of two-dimensional arrays. Both the backends require the `kernel` to be of the same dimension as the array, so the one-dimensional kernel is extended to two-dimensions. Note that the shape of the two-dimensional `kernel` will be different for both x- and z- directions since there will be a non-unit stride in the z-direction. 
+Note that for the NumPy backend, we use the `convolve` API from SciPy since NumPy does not support convolution of two-dimensional arrays. cuPyNumeric, on the other hand, does support convolution of two-dimensional arrays. Both the backends require the `kernel` to be of the same dimension as the array, so the one-dimensional kernel is extended to two-dimensions. Note that the shape of the two-dimensional `kernel` will be different for both x- and z- directions since there will be a non-unit stride in the z-direction. 
 
 <!-- [THIS PARAGRAPH NEEDS A REWRITE]
 
@@ -203,9 +203,9 @@ This simulates collision of the above two thermal bubbles - a hot one that rises
 
 
 ## Installation
-Follow installation of [Legate core](https://github.com/nv-legate/legate.core?tab=readme-ov-file#how-do-i-install-legate) by creating a new conda environment that allows using cuNumeric, a Legate library that aspires to be the distributed and accelerated version of the widely used scientific computing python package, NumPy.
+Follow installation of [Legate core](https://github.com/nv-legate/legate.core?tab=readme-ov-file#how-do-i-install-legate) by creating a new conda environment that allows using cuPyNumeric, a Legate library that aspires to be the distributed and accelerated version of the widely used scientific computing python package, NumPy.
 
-Once you are able to run [cuNumeric](https://github.com/nv-legate/cunumeric), install PyMiniWeather using pip
+Once you are able to run [cuPyNumeric](https://github.com/nv-legate/cupynumeric), install PyMiniWeather using pip
 
 ```
 cd PyMiniWeather
@@ -230,7 +230,7 @@ PyMiniWeather currently accepts the following arguments:
 | output-freq               | The solution variables will be written to a file every output-freq timesteps    | -1
 | filename                  | Name of the output file the solution variables                                  | "PyMiniWeatherData.txt"
 
-PyMiniWeather can be run using `numpy` or `cunumeric` as follows:
+PyMiniWeather can be run using `numpy` or `cupynumeric` as follows:
 ```
 cd work
 mkdir -p post/images
@@ -238,7 +238,7 @@ ${CONDA_PREFIX}/bin/PyMiniweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-
 <path-to-pyminiweather>/tools/make_images.py --nx 2500 --nz 1250 --ntimesteps 3 --directory ./post 
 ```
 
-Run using the following command to use cuNumeric:
+Run using the following command to use cuPyNumeric:
 ```
 cd work
 mkdir -p post/images
@@ -280,7 +280,7 @@ For more details on governing equations and the numerical method that is used fo
 
 ## Work In Progress / TO DO
 
-- [ ] Test all initial conditions for the two supported backends: NumPy/SciPy and cuNumeric
+- [ ] Test all initial conditions for the two supported backends: NumPy/SciPy and cuPyNumeric
 - [ ] Add unit tests for a number of utility functions used in the initial conditions
 - [ ] A section that details the PDE and its discretized form is still in the works
 

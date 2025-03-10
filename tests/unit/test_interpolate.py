@@ -1,4 +1,4 @@
-import cunumeric as np
+import cupynumeric as np
 import numpy as num
 import pytest
 from scipy.signal import convolve2d
@@ -65,7 +65,7 @@ def test_interpolate_z():
 
 def test_convolution():
     """
-    Make sure cuNumeric convolution and scipy's convolve2D give
+    Make sure cuPyNumeric convolution and scipy's convolve2D give
     the same result
     """
 
