@@ -7,8 +7,8 @@ This work is a pedagogical exercise meant to teach users how to approach problem
 We focus on the serial implementation of the [MiniWeather](https://github.com/mrnorman/miniWeather) app using two backends that support array-based programming: NumPy/SciPy and [cuPyNumeric](https://github.com/nv-legate/cupynumeric). While NumPy only allows single threaded execution of the program, cuPyNumeric will allow execution on multiple GPUs/CPUs/OMPs with no code change to the serial code demonstrating significant improvement in developer productivity. This obviates the need for expertise in distributed computing for users interested in solving large problems in scientific computing.
 
 ## Learning Objectives
--  Learn the difference between the array-based implementation and element wise implementation of a PDE solver
-   - Learn how to transform nested for loops into array-based codes
+-  Learn the difference between the array-based implementation and element-wise implementation of a PDE solver
+   - Learn how to transform nested for loops into array-based equivalents
    - Learn how to handle temporary variables found in element-wise codes
 -  Learn how to develop a simple PDE solver using NumPy and/or cuPyNumeric
 
@@ -21,17 +21,17 @@ We focus on the serial implementation of the [MiniWeather](https://github.com/mr
 
 - While not exactly a pre-requisite, a basic understanding of convolution operation will be helpful in understanding some parts of the code. Use [Convolution Visualizer](https://ezyang.github.io/convolution-visualizer/) or watch a [YouTube Video](https://www.youtube.com/watch?v=KuXjwB4LzSA) to get a basic understanding.
 
-- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuPyNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cupynumeric?tab=readme-ov-file#installation). Create an issue if you are having trouble installing. Use NumPy to get started.
+- For multi-process or multi-threaded executions or to use GPUs, you will need to install cuPyNumeric. Follow installation instructions on our [page](https://github.com/nv-legate/cupynumeric?tab=readme-ov-file#installation). Create an issue if you have trouble installing. Use NumPy to get started or if you are unable to install cuPyNumeric but be aware that the code falls back to NumPy and SciPy, neither of which support distributed execution, so you will be able to run only on one CPU.
 
 ## Key Concepts
 - Learn how linear interpolation using custom weights can be implemented using NumPy
 - Learn how numerical integration can be implemented using NumPy
-- In general, learn how to transform nested for loops into their array-based equivalents in NumPy. While this topic can be vast, this repository teaches the above two concepts
-- Be amazed when you realize that PyMiniWeather avoids all halo-exchanges that are commonly found in data-parallel codes implemented using MPI. For example, see the [halo exchange](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_mpi.cpp#L399) in Matt's implementation. You won't see that or any other exchanges in this implementation. Take a minute and understand what that means. You just write serial code. That's it.
+- Learn how to transform nested for loops into their array-based equivalents in NumPy
+- PyMiniWeather avoids all halo-exchanges that are commonly found in data-parallel stencil operations implemented using MPI. For example, see the [halo exchange](https://github.com/mrnorman/miniWeather/blob/31e1f3803220b20e029b28bf62e7379749061db6/c/miniWeather_mpi.cpp#L399) in Matt's implementation. You won't see that or any other exchanges in this implementation. You just write serial code. That's it.
 
 ## Background
 
-From this section, we assume that the reader is familiar with the content in Matt's original blog that has more background information on MiniWeather. The reader is also expected to have taken a look at the C or C++ implementation of a serial or parallel version of Matt's implementation. 
+From this section, we assume that the reader is familiar with the content in Matt's blogpost and the C or C++ implementation of a serial or parallel version of Miniweather.
 
 ### Numerical Method
 
@@ -71,7 +71,7 @@ for (int k=0; k<nz; k++) {
 }
 ```
 
-The above implementation consists of looping over the spatial extents relevant to the output of the computation for all the four conservative variables (`NUM_VARS`). This helps select `window` of values from a conservative variable onto to the interpolating kernel or `stencil` as it is referred in the above code snippet. The window size in this example is controlled by the variable `sten_size`. The variables `vals` and `d3_vals `, which represent the fourth order and first order interpolation of conserved quantities and hyperviscosity term respectively, is obtained by a dot product of `weights` and the conserved variable. It is important to note that these two variables are temporary variables in the computation and that their values for each coordinate in the grid is independent of the rest. The operation is then repeated for all the variables and then the window is moved by one unit in the x-direction and eventually by one unit in the z-direction. See the figure below for a pictorial representation of the workflow.
+The above implementation consists of looping over the spatial extents relevant to the output of the computation for all the four conservative variables (`NUM_VARS`). This helps select `window` of values from a conservative variable onto to the interpolating kernel or `stencil` as used in the above code snippet. The window size in this example is controlled by the variable `sten_size`. The variables `vals` and `d3_vals `, which represent the fourth order and first order interpolation of conserved quantities and hyperviscosity term respectively, is obtained by a dot product of `weights` and the conserved variable. It is important to note that these two variables are temporary variables in the computation and that their values for each coordinate in the grid is independent of the rest. The operation is then repeated for all the variables and then the window is moved by one unit in the x-direction and eventually by one unit in the z-direction. See the figure below for a pictorial representation of the workflow.
 
 ![Alt text](images/convolution_1.png)
 
@@ -186,8 +186,7 @@ Simulations of supported configurations mentioned above were performed for an ex
 -->
 
 ### Rising thermal bubble
-This simulates the rising of a dry warm bubble due to density differences (buoyancy effects). See section 3(b) in [this](https://journals.ametsoc.org/view/journals/mwre/143/12/mwr-d-15-0134.1.xml) article for more information on the setup for rising thermal bubble simulation
-. The initial condition for the simulation is different from eq. (35) in the article where a squared cosine profile for the points that are inside an elliptical bubble of prescribed radius is used. For more details on the implementation, look at [initial_conditions.py](pyminiweather/ics/initial_conditions.py)
+This simulates the rising of a dry warm bubble due to density differences (buoyancy effects). See section 3(b) in [this](https://journals.ametsoc.org/view/journals/mwre/143/12/mwr-d-15-0134.1.xml) article for more information on the setup for rising thermal bubble simulation. The initial condition for the simulation is different from eq. (35) in the article where a squared cosine profile for the points that are inside an elliptical bubble of prescribed radius is used. For more details on the implementation, look at [initial_conditions.py](pyminiweather/ics/initial_conditions.py)
 
 ![](anims/thermal.gif)
 
@@ -230,7 +229,7 @@ PyMiniWeather currently accepts the following arguments:
 | output-freq               | The solution variables will be written to a file every output-freq timesteps    | -1
 | filename                  | Name of the output file the solution variables                                  | "PyMiniWeatherData.txt"
 
-PyMiniWeather can be run using `numpy` or `cupynumeric` as follows:
+PyMiniWeather can be run using `numpy` or `cupynumeric` as follows.
 ```
 cd work
 mkdir -p post/images
@@ -238,7 +237,8 @@ ${CONDA_PREFIX}/bin/PyMiniweather.py --nx 2500 --nz 1250 --nsteps 3000 --output-
 <path-to-pyminiweather>/tools/make_images.py --nx 2500 --nz 1250 --ntimesteps 3 --directory ./post 
 ```
 
-Run using the following command to use cuPyNumeric:
+Uses a resolution of (2500, 1250) to run for 3000 steps and performing an I/O every 1000 steps for the "thermal" initial condition, which simulates rising thermal bubble. To use cuPyNumeric and run on GPU(s), use the following command:
+
 ```
 cd work
 mkdir -p post/images
@@ -257,7 +257,7 @@ Currently, PyMiniWeather dumps 2D slices of 3D and 4D arrays and reshapes them b
 
 Use `${CONDA_PREFIX}/bin/PyMiniweather.py --help` to get more information on initial conditions that are supported by the solver.
 
-## How to Write a PDE solver
+## Notes on writing a PDE solver
 ### Governing equations and discretization
 For more details on governing equations and the numerical method that is used for the discretization, start here: [Physics, PDEs, and Numerical Approximations](https://github.com/mrnorman/miniWeather?tab=readme-ov-file#physics-pdes-and-numerical-approximations). We assume that the reader has understood the governing equations and the spatial and temporal discretization.
 
@@ -267,9 +267,9 @@ For more details on governing equations and the numerical method that is used fo
 
 3. Identify "interior" and "exterior" points: Unlike parallel codes where interior and exterior refer to the part of the domain that is interior and exterior to the MPI process, here interior and exterior refer to the points inside and outside the domain, where the domain is the rectangular channel. The exterior points are also known as the ghost points. 
 
-4. Mesh: For structured uniform meshes, the mesh can be generated using numpy's `meshgrid`. Note that we need access to different region within the mesh. For instance, we may need to apply an update to the domain points that include the interior and exterior  or only the interior or part of interior and exterior in a certain direction, and so on. All of these operations require `slicing` the numpy array appropriately, but before that you need to understand the difference between the represe
+4. Mesh: For structured uniform meshes, the mesh can be generated using numpy's `meshgrid`. Note that we need access to different region within the mesh. For instance, we may need to apply an update to the domain points that include the interior and exterior  or only the interior or part of interior and exterior in a certain direction, and so on. All of these operations require `slicing` the numpy array appropriately.
 
-4. Remember the difference between representation of "numerical domain" and "cartesian domain". For structurted me
+4. Remember the difference between representation of "numerical domain" and "cartesian domain", especially when array-based representation is used, e.g., using NumPy.
 
 
 ## Future work
@@ -287,17 +287,14 @@ For more details on governing equations and the numerical method that is used fo
 
 ## Gotchas
 
-- [ ] The current I/O mechanism creates two files - one for the variables that are solved and the other for deriverd quantities. The second file gets appended with `svars` towards which doesn't work with `make_images.py` when `filename` is passed.
+- [ ] The current I/O process creates two files:- one for the variables that are solved and the other for deriverd quantities. The second file gets appended with `svars` towards which doesn't work with `make_images.py` when `filename` is passed.
 - [ ] The `injection` initial condition is not supported but is implemented. This either needs to be supported or removed from the code base.
 - [ ]  Any change to the length of the domain is not accompanied with a corresponding change in the specifications of the hot or cold thermal bubble in the initial conditions. It is suggested that the user change the number of grid points in x- or z- direction but not the domain lengths (yet).
 
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+Please fork this repository and submit a PR if you would like to contribute
 
 
 ## Authors and acknowledgment
 Shriram Jagannathan, NVIDIA.
-
-## License
-For open source projects, say how it is licensed.
