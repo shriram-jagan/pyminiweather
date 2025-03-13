@@ -212,7 +212,7 @@ for timestep in range(step_start, step_end, step_skip):
     plt.tight_layout()
 
     fname = f"{image_directory}/{timestep:0>3}.png"
-    plt.savefig(fname)
+    plt.savefig(fname, dpi=600)
     plt.close(fig)
 
 # Make animation if requested
