@@ -34,9 +34,9 @@ def set_bc_x(params: Dict, fields: Fields, state_forcing: np.ndarray, ic_type: s
     # update all variables
     state_forcing[:, hs : nz + hs, 0] = state_forcing[:, hs : nz + hs, nx]
     state_forcing[:, hs : nz + hs, 1] = state_forcing[:, hs : nz + hs, nx + 1]
-
-    state_forcing[:, hs : nz + hs, nx + hs] = state_forcing[:, hs : nz + hs, hs]
-    state_forcing[:, hs : nz + hs, nx + hs + 1] = state_forcing[:, hs : nz + hs, hs + 1]
+    if ic_type != "injection": #special treatment for injection
+        state_forcing[:, hs : nz + hs, nx + hs] = state_forcing[:, hs : nz + hs, hs]
+        state_forcing[:, hs : nz + hs, nx + hs + 1] = state_forcing[:, hs : nz + hs, hs + 1]
 
     if ic_type == "injection":
         # for injections, update u and t
